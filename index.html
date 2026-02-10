@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#ffffff">
-    <title>SnapCalc Precision</title>
+    <title>SnapCalc Sorted</title>
     
     <link rel="apple-touch-icon" href="https://img.icons8.com/color/480/calculator--v1.png">
     
@@ -74,7 +74,6 @@
                 </div>
             </div>
             <div id="tripDateDisplay" class="text-xs font-semibold text-gray-400 mb-4 border-b border-gray-100 dark:border-gray-800 pb-4">No data</div>
-            
             <div id="tripList" class="space-y-3"></div>
         </div>
 
@@ -92,7 +91,6 @@
                 </div>
             </div>
             <div id="weeklyDateDisplay" class="text-xs font-semibold text-gray-400 mb-4 border-b border-gray-100 dark:border-gray-800 pb-4">No data</div>
-            
             <div id="weeklyList" class="space-y-3"></div>
         </div>
 
@@ -136,17 +134,23 @@
     </div>
 
     <script>
-        // --- STATE ---
+        // --- CONFIG & STATE ---
         let scannedItems = []; 
         let worker = null;
 
-        // --- REGEX ---
+        // Regex
         const WEEKLY_INDICATOR_REGEX = /(Confirmed Weekly Earnings|Weekly Summary|Pay Statement)/i;
         const DATE_SINGLE_REGEX = /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s+([A-Z][a-z]{2})\s+(\d{1,2})(st|nd|rd|th)?\b/i;
         const DATE_RANGE_REGEX = /[A-Z][a-z]{2}\.?\s\d{1,2}\s?-\s?[A-Z][a-z]{2}\.?\s\d{1,2}/;
+        
+        // Regex for extraction
         const CURRENCY_REGEX = /\$\s?([0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?)/g;
         const TIPS_VAL_REGEX = /Unconfirmed Weekly Tips[\s\S]*?\$([0-9,]+\.[0-9]{2})/i;
         const CONFIRMED_VAL_REGEX = /Confirmed Weekly Earnings[\s\S]*?\$([0-9,]+\.[0-9]{2})/i;
+        
+        // NEW: Specific regex to find "Trip #1234 ... $20.00"
+        // Captures Group 1: ID, Group 2: Amount
+        const TRIP_LINE_REGEX = /Trip #(\d+)[\s\S]*?\$([0-9,]+\.[0-9]{2})/gi;
 
         // --- INIT ---
         window.addEventListener('DOMContentLoaded', () => {
@@ -172,6 +176,7 @@
                     blobUrl: URL.createObjectURL(fileArray[i]),
                     amount: 0,
                     dateLabel: 'Reading...',
+                    dateObj: new Date(0), // Default to epoch for sorting
                     rawValues: []
                 });
             }
@@ -187,28 +192,41 @@
                 if (!worker) await initWorker();
                 const { data: { text } } = await worker.recognize(resizedBlob);
 
+                // 1. Identify Type
                 let isWeekly = WEEKLY_INDICATOR_REGEX.test(text);
                 item.type = isWeekly ? 'weekly' : 'trip';
 
+                // 2. Extract Date
                 let dateLabel = "Unknown Date";
+                let dateObj = new Date(0); // For sorting
+
                 if (isWeekly) {
                     const rangeMatch = text.match(DATE_RANGE_REGEX);
                     if (rangeMatch) dateLabel = rangeMatch[0];
                     else {
                         const singleMatch = text.match(DATE_SINGLE_REGEX);
-                        if (singleMatch) dateLabel = `${singleMatch[2]} ${singleMatch[3]}`;
+                        if (singleMatch) {
+                            dateLabel = `${singleMatch[2]} ${singleMatch[3]}`;
+                            dateObj = parseDateStr(dateLabel);
+                        }
                     }
                 } else {
                     const singleMatch = text.match(DATE_SINGLE_REGEX);
-                    if (singleMatch) dateLabel = singleMatch[0];
+                    if (singleMatch) {
+                        dateLabel = singleMatch[0]; // e.g. "Mon, Feb 9th"
+                        dateObj = parseDateStr(`${singleMatch[2]} ${singleMatch[3]}`);
+                    }
                 }
                 item.dateLabel = dateLabel;
+                item.dateObj = dateObj;
 
+                // 3. Extract Money & IDs
                 let total = 0;
                 let values = [];
+                let workingText = text;
 
                 if (isWeekly) {
-                    let workingText = text;
+                    // Weekly Logic
                     const tipsMatch = workingText.match(TIPS_VAL_REGEX);
                     if (tipsMatch) {
                         const val = parseFloat(tipsMatch[1].replace(/,/g, ''));
@@ -223,13 +241,29 @@
                         values.push({ label: "Confirmed Earnings", val: val });
                     }
                 } else {
-                    const matches = text.match(CURRENCY_REGEX);
-                    if (matches) {
-                        matches.forEach(m => {
-                            const val = parseFloat(m.replace(/[^0-9.]/g, ''));
-                            total += val;
-                            values.push({ label: "Trip Amount", val: val });
-                        });
+                    // Trip Logic: Try to find "Trip #..." lines first
+                    let tripMatches;
+                    // Reset regex lastIndex
+                    TRIP_LINE_REGEX.lastIndex = 0;
+                    
+                    while ((tripMatches = TRIP_LINE_REGEX.exec(workingText)) !== null) {
+                        const tripID = tripMatches[1];
+                        const val = parseFloat(tripMatches[2].replace(/,/g, ''));
+                        total += val;
+                        values.push({ label: `Trip #${tripID}`, val: val });
+                    }
+
+                    // If no specific trip lines found, fallback to simple money finding
+                    // (But only if values is empty, to prevent double counting if the regex missed something weird)
+                    if (values.length === 0) {
+                        const matches = workingText.match(CURRENCY_REGEX);
+                        if (matches) {
+                            matches.forEach(m => {
+                                const val = parseFloat(m.replace(/[^0-9.]/g, ''));
+                                total += val;
+                                values.push({ label: "Trip Amount", val: val });
+                            });
+                        }
                     }
                 }
 
@@ -242,7 +276,7 @@
             } catch (err) {
                 console.error(err);
                 item.status = 'error';
-                item.dateLabel = 'Error Reading';
+                item.dateLabel = 'Error';
                 render();
             }
         }
@@ -258,22 +292,30 @@
             const totalDisplay = document.getElementById(type + 'TotalDisplay');
             const dateDisplay = document.getElementById(type + 'DateDisplay');
             
-            const displayItems = type === 'trip' 
+            // 1. Filter
+            let displayItems = type === 'trip' 
                 ? scannedItems.filter(i => i.type === 'trip' || i.type === 'unknown') 
                 : scannedItems.filter(i => i.type === 'weekly');
 
+            // 2. SORT (Newest Date First)
+            displayItems.sort((a, b) => new Date(b.dateObj) - new Date(a.dateObj));
+
+            // 3. Calc Total
             const total = displayItems.reduce((sum, item) => sum + (item.amount || 0), 0);
             totalDisplay.innerText = total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+            // 4. Update Header Date
             const uniqueDates = [...new Set(displayItems.map(i => i.dateLabel).filter(d => d !== 'Reading...' && d !== 'Unknown Date'))];
             if (uniqueDates.length > 0) {
-                dateDisplay.innerText = uniqueDates.length > 1 ? `${uniqueDates[0]} ...` : uniqueDates[0];
+                // Show range if multiple dates
+                dateDisplay.innerText = uniqueDates.length > 1 ? `${uniqueDates[0]} - ${uniqueDates[uniqueDates.length-1]}` : uniqueDates[0];
             } else if (displayItems.length > 0) {
                  dateDisplay.innerText = displayItems[0].status === 'processing' ? 'Processing...' : 'No date found';
             } else {
                 dateDisplay.innerText = 'No data';
             }
 
+            // 5. Render List
             let html = '';
             displayItems.forEach(item => {
                 let statusHtml = '';
@@ -282,11 +324,6 @@
                 else statusHtml = `+$${item.amount.toFixed(2)}`;
 
                 const displayLabel = (item.status === 'done' && item.dateLabel !== 'Unknown Date') ? item.dateLabel : item.fileName;
-
-                // Onclick on the whole row for Trips, but just render normal for Weekly if desired.
-                // Request was: "audit in trips should only show when I select the date"
-                // So we add onclick to the div
-                
                 const clickAction = `onclick="openSingleItemAudit(${item.id})"`;
                 const cursorClass = `cursor-pointer active:scale-[0.98] hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-all`;
 
@@ -313,14 +350,13 @@
         }
 
         // --- AUDIT SYSTEM ---
-        
-        // 1. GLOBAL AUDIT (For Weekly Total)
         function openGlobalAudit(type) {
-            const items = scannedItems.filter(i => i.type === type && i.status === 'done');
+            // Sort items for global audit too
+            const items = scannedItems.filter(i => i.type === type && i.status === 'done')
+                                      .sort((a, b) => new Date(b.dateObj) - new Date(a.dateObj));
             renderAuditModal(type === 'trip' ? 'Trips Total' : 'Weekly Total', items);
         }
 
-        // 2. SINGLE ITEM AUDIT (For Trip Date Click)
         function openSingleItemAudit(id) {
             const item = scannedItems.find(i => i.id === id);
             if(item && item.status === 'done') {
@@ -344,7 +380,6 @@
                     html += `<div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4">
                         <div class="flex justify-between items-center mb-2 border-b border-gray-200 dark:border-gray-700 pb-2">
                             <span class="text-xs font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">${item.dateLabel}</span>
-                            <span class="text-[10px] text-gray-400">Source: Image</span>
                         </div>
                         <div class="space-y-1">
                         ${item.rawValues.map(v => `
@@ -380,6 +415,12 @@
         }
 
         // --- UTILS ---
+        function parseDateStr(str) {
+            // Helper to parse "Feb 9" or "Feb 9 2026"
+            const currentYear = new Date().getFullYear();
+            return new Date(`${str} ${currentYear}`);
+        }
+
         function initTheme() {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
@@ -405,7 +446,7 @@
         function resetApp() {
             if(confirm('Reset all data?')) {
                 scannedItems = [];
-                localStorage.removeItem('snapcalc_history_v5');
+                localStorage.removeItem('snapcalc_history_v6');
                 render();
             }
         }
@@ -415,7 +456,7 @@
             render();
         }
         function loadHistory() {
-            const stored = localStorage.getItem('snapcalc_history_v5');
+            const stored = localStorage.getItem('snapcalc_history_v6');
             if (stored) {
                 try { scannedItems = JSON.parse(stored); render(); } 
                 catch (e) { console.error(e); }
@@ -423,7 +464,7 @@
         }
         function saveHistory() {
             const toSave = scannedItems.map(i => ({...i, blobUrl: ''}));
-            localStorage.setItem('snapcalc_history_v5', JSON.stringify(toSave));
+            localStorage.setItem('snapcalc_history_v6', JSON.stringify(toSave));
         }
         async function initWorker() {
             try {
