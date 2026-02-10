@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#ffffff">
-    <title>SnapCalc UI Design</title>
+    <title>SnapCalc Modern</title>
     
     <link rel="apple-touch-icon" href="https://img.icons8.com/color/480/calculator--v1.png">
     
@@ -18,9 +18,19 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        bg: { light: '#ffffff', dark: '#000000' },
-                        surface: { light: '#f3f4f6', dark: '#1c1c1e' },
-                        border: { light: '#e5e7eb', dark: '#333333' }
+                        // iOS System Colors
+                        ios: {
+                            bg: '#F2F2F7', // System Gray 6
+                            card: '#FFFFFF',
+                            text: '#000000',
+                            
+                            darkBg: '#000000',
+                            darkCard: '#1C1C1E', // System Gray 6 Dark
+                            darkText: '#FFFFFF',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 8px 30px rgba(0,0,0,0.04)',
                     }
                 }
             }
@@ -32,91 +42,107 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
-        body { -webkit-tap-highlight-color: transparent; }
-        /* Custom Box Style from Wireframe */
-        .total-box {
-            border: 2px solid currentColor;
-            padding: 12px 24px;
-            display: inline-block;
-            font-weight: 700;
-            font-size: 2rem; /* 32px */
-            line-height: 1;
-            letter-spacing: -0.02em;
+        body { 
+            -webkit-tap-highlight-color: transparent; 
+            font-family: 'Inter', sans-serif;
         }
-        .modal-enter { opacity: 0; transform: scale(0.95); }
-        .modal-enter-active { opacity: 1; transform: scale(1); transition: all 0.2s ease-out; }
-        .modal-exit { opacity: 1; transform: scale(1); }
-        .modal-exit-active { opacity: 0; transform: scale(0.95); transition: all 0.2s ease-in; }
-        .scroll-hide::-webkit-scrollbar { display: none; }
+        
+        /* Smooth Fade Transitions */
+        .fade-enter { opacity: 0; transform: translateY(10px); }
+        .fade-enter-active { opacity: 1; transform: translateY(0); transition: all 0.3s ease-out; }
+        
+        /* Hide Scrollbar */
+        .no-scroll::-webkit-scrollbar { display: none; }
+        .no-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-white dark:bg-black text-black dark:text-white transition-colors duration-300 flex flex-col h-screen overflow-hidden font-sans">
+<body class="bg-ios-bg dark:bg-ios-darkBg text-ios-text dark:text-ios-darkText transition-colors duration-300 flex flex-col h-screen overflow-hidden selection:bg-blue-500 selection:text-white">
 
-    <div id="globalStatus" class="absolute top-4 right-4 z-50 text-[10px] font-bold text-blue-600 dark:text-blue-400 hidden animate-pulse uppercase tracking-wider">
+    <div id="globalStatus" class="absolute top-12 right-6 z-50 text-[10px] font-bold text-blue-600 dark:text-blue-400 hidden animate-pulse bg-white dark:bg-gray-800 px-2 py-1 rounded-full shadow-sm">
         Initializing...
     </div>
 
-    <main class="flex-1 overflow-y-auto scroll-hide px-6 py-8 flex flex-col items-center space-y-10">
+    <main class="flex-1 overflow-y-auto no-scroll px-5 pt-12 pb-32 flex flex-col space-y-4">
 
-        <div class="w-full flex flex-col items-center">
-            <h1 class="text-sm font-bold tracking-[0.2em] uppercase mb-4 opacity-60">TRIPS</h1>
+        <div class="flex justify-between items-end px-1 pb-2">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Dashboard</h1>
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider" id="currentDateDisplay">TODAY</p>
+            </div>
             
-            <button onclick="openAudit('trip')" class="total-box border-black dark:border-white mb-2 active:scale-95 transition-transform">
-                $<span id="tripTotalDisplay">0.00</span>
+            <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-white dark:bg-gray-800 shadow-soft flex items-center justify-center text-xl transition-transform active:scale-90 text-gray-600 dark:text-yellow-400">
+                <i id="themeIcon" class="ph-fill ph-moon"></i>
             </button>
-            
-            <div id="tripDateDisplay" class="text-xs font-semibold uppercase opacity-50 mb-4">NO DATA</div>
+        </div>
 
-            <div id="tripList" class="w-full max-w-xs space-y-2">
+        <div class="bg-white dark:bg-ios-darkCard rounded-[32px] p-6 shadow-soft relative overflow-hidden group">
+            <div class="flex justify-between items-start mb-2">
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">TRIPS TOTAL</span>
+                    <button onclick="openAudit('trip')" class="text-left">
+                        <span class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white active:opacity-50 transition-opacity">$<span id="tripTotalDisplay">0.00</span></span>
+                    </button>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-500">
+                    <i class="ph-fill ph-car text-sm"></i>
+                </div>
+            </div>
+            
+            <div id="tripDateDisplay" class="text-xs font-semibold text-gray-400 mb-4 border-b border-gray-100 dark:border-gray-800 pb-4">No data</div>
+
+            <div id="tripList" class="space-y-3">
                 </div>
         </div>
 
-        <div class="w-12 h-[2px] bg-gray-200 dark:bg-gray-800 rounded-full"></div>
-
-        <div class="w-full flex flex-col items-center">
-            <h1 class="text-sm font-bold tracking-[0.2em] uppercase mb-4 opacity-60">WEEKLY</h1>
-            
-            <button onclick="openAudit('weekly')" class="total-box border-black dark:border-white mb-2 active:scale-95 transition-transform">
-                $<span id="weeklyTotalDisplay">0.00</span>
-            </button>
-            
-            <div id="weeklyDateDisplay" class="text-xs font-semibold uppercase opacity-50 mb-4">NO DATA</div>
-
-            <div id="weeklyList" class="w-full max-w-xs space-y-2">
+        <div class="bg-white dark:bg-ios-darkCard rounded-[32px] p-6 shadow-soft relative overflow-hidden">
+            <div class="flex justify-between items-start mb-2">
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">WEEKLY EARNINGS</span>
+                    <button onclick="openAudit('weekly')" class="text-left">
+                        <span class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white active:opacity-50 transition-opacity">$<span id="weeklyTotalDisplay">0.00</span></span>
+                    </button>
                 </div>
-        </div>
-
-        <div class="flex-1"></div>
-
-        <div class="w-full max-w-xs flex justify-between items-center px-4 pb-4">
-            <button onclick="toggleTheme()" class="border border-black dark:border-white px-4 py-2 text-xs font-bold uppercase tracking-wider active:bg-black active:text-white dark:active:bg-white dark:active:text-black transition-colors">
-                <span id="themeLabel">Dark</span> Mode
-            </button>
+                <div class="w-8 h-8 rounded-full bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-500">
+                    <i class="ph-fill ph-money text-sm"></i>
+                </div>
+            </div>
             
-            <button onclick="resetApp()" class="bg-red-600 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-red-700 active:scale-95 transition-all">
-                Reset
-            </button>
+            <div id="weeklyDateDisplay" class="text-xs font-semibold text-gray-400 mb-4 border-b border-gray-100 dark:border-gray-800 pb-4">No data</div>
+
+            <div id="weeklyList" class="space-y-3">
+                </div>
         </div>
 
     </main>
 
-    <div class="p-6 bg-gradient-to-t from-white via-white to-transparent dark:from-black dark:via-black z-20">
-        <label class="block w-full border-2 border-black dark:border-white h-[56px] flex items-center justify-center cursor-pointer active:scale-[0.98] transition-transform bg-white dark:bg-black">
-            <span class="font-bold text-sm tracking-widest uppercase">ADD SCREENSHOT</span>
-            <form id="uploadForm" class="hidden">
-                <input type="file" id="fileInput" accept="image/*" multiple onchange="handleFiles(this.files)">
-            </form>
-        </label>
+    <div class="fixed bottom-0 left-0 w-full p-5 bg-gradient-to-t from-ios-bg via-ios-bg to-transparent dark:from-black dark:via-black z-30 pt-10">
+        
+        <div class="flex gap-3 items-center">
+            <button onclick="resetApp()" class="h-[56px] w-[56px] flex-none bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center active:scale-95 transition-transform">
+                <i class="ph-bold ph-trash text-xl"></i>
+            </button>
+
+            <label class="flex-1 h-[56px] bg-black dark:bg-white text-white dark:text-black rounded-2xl shadow-lg flex items-center justify-center space-x-2 cursor-pointer active:scale-[0.98] transition-transform">
+                <i class="ph-bold ph-camera text-xl"></i>
+                <span class="font-bold text-sm tracking-wide">ADD SCREENSHOT</span>
+                <form id="uploadForm" class="hidden">
+                    <input type="file" id="fileInput" accept="image/*" multiple onchange="handleFiles(this.files)">
+                </form>
+            </label>
+        </div>
     </div>
 
-    <div id="auditModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-6">
-        <div class="absolute inset-0 bg-white/90 dark:bg-black/90 backdrop-blur-sm" onclick="closeAudit()"></div>
-        <div class="bg-white dark:bg-[#1c1c1e] w-full max-w-sm max-h-[70vh] flex flex-col shadow-2xl relative z-10 border-2 border-black dark:border-white modal-enter">
-            <div class="p-4 border-b-2 border-black dark:border-white flex justify-between items-center">
-                <h3 class="font-bold uppercase tracking-widest" id="auditTitle">AUDIT</h3>
-                <button onclick="closeAudit()"><i class="ph ph-x text-xl"></i></button>
+    <div id="auditModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity opacity-0" id="auditOverlay" onclick="closeAudit()"></div>
+        <div class="bg-white dark:bg-[#1c1c1e] w-full max-w-sm max-h-[70vh] flex flex-col shadow-2xl rounded-3xl relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="auditCard">
+            <div class="p-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                <div>
+                    <h3 class="font-extrabold text-lg tracking-tight" id="auditTitle">Audit</h3>
+                    <p class="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Detected Values</p>
+                </div>
+                <button onclick="closeAudit()" class="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center"><i class="ph-bold ph-x"></i></button>
             </div>
-            <div class="p-4 overflow-y-auto" id="auditContent"></div>
+            <div class="p-5 overflow-y-auto no-scroll" id="auditContent"></div>
         </div>
     </div>
 
@@ -126,14 +152,9 @@
         let worker = null;
 
         // --- REGEX CONFIG ---
-        // Looks for specific headers to categorize as WEEKLY
         const WEEKLY_INDICATOR_REGEX = /(Confirmed Weekly Earnings|Weekly Summary|Pay Statement)/i;
-        
-        // Date Parsers
         const DATE_SINGLE_REGEX = /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s+([A-Z][a-z]{2})\s+(\d{1,2})(st|nd|rd|th)?\b/i;
-        const DATE_RANGE_REGEX = /[A-Z][a-z]{2}\.?\s\d{1,2}\s?-\s?[A-Z][a-z]{2}\.?\s\d{1,2}/; // e.g. Feb 9 - Feb 15
-
-        // Money Parsers
+        const DATE_RANGE_REGEX = /[A-Z][a-z]{2}\.?\s\d{1,2}\s?-\s?[A-Z][a-z]{2}\.?\s\d{1,2}/;
         const CURRENCY_REGEX = /\$\s?([0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?)/g;
         const TIPS_VAL_REGEX = /Unconfirmed Weekly Tips[\s\S]*?\$([0-9,]+\.[0-9]{2})/i;
         const CONFIRMED_VAL_REGEX = /Confirmed Weekly Earnings[\s\S]*?\$([0-9,]+\.[0-9]{2})/i;
@@ -143,6 +164,7 @@
             initTheme();
             loadHistory();
             initWorker();
+            document.getElementById('currentDateDisplay').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
         });
 
         // --- FILE HANDLING ---
@@ -155,7 +177,7 @@
                 scannedItems.push({
                     id: Date.now() + Math.random(),
                     status: 'processing',
-                    type: 'unknown', // 'trip' or 'weekly'
+                    type: 'unknown',
                     file: fileArray[i],
                     fileName: fileArray[i].name,
                     blobUrl: URL.createObjectURL(fileArray[i]),
@@ -176,11 +198,10 @@
                 if (!worker) await initWorker();
                 const { data: { text } } = await worker.recognize(resizedBlob);
 
-                // 1. DETERMINE TYPE
                 let isWeekly = WEEKLY_INDICATOR_REGEX.test(text);
                 item.type = isWeekly ? 'weekly' : 'trip';
 
-                // 2. EXTRACT DATE
+                // Date Extraction
                 let dateLabel = "Unknown Date";
                 if (isWeekly) {
                     const rangeMatch = text.match(DATE_RANGE_REGEX);
@@ -191,26 +212,23 @@
                     }
                 } else {
                     const singleMatch = text.match(DATE_SINGLE_REGEX);
-                    if (singleMatch) dateLabel = singleMatch[0]; // "Mon, Feb 9th"
+                    if (singleMatch) dateLabel = singleMatch[0];
                 }
                 item.dateLabel = dateLabel;
 
-                // 3. EXTRACT MONEY
+                // Money Extraction
                 let total = 0;
                 let values = [];
 
                 if (isWeekly) {
-                    // --- WEEKLY LOGIC ---
                     let workingText = text;
-                    // Tips
                     const tipsMatch = workingText.match(TIPS_VAL_REGEX);
                     if (tipsMatch) {
                         const val = parseFloat(tipsMatch[1].replace(/,/g, ''));
                         total += val;
                         values.push({ label: "Unconfirmed Tips", val: val });
-                        workingText = workingText.replace(tipsMatch[0], ''); // Remove to prevent double count
+                        workingText = workingText.replace(tipsMatch[0], '');
                     }
-                    // Earnings
                     const earningsMatch = workingText.match(CONFIRMED_VAL_REGEX);
                     if (earningsMatch) {
                         const val = parseFloat(earningsMatch[1].replace(/,/g, ''));
@@ -218,7 +236,6 @@
                         values.push({ label: "Confirmed Earnings", val: val });
                     }
                 } else {
-                    // --- TRIP LOGIC ---
                     const matches = text.match(CURRENCY_REGEX);
                     if (matches) {
                         matches.forEach(m => {
@@ -253,48 +270,42 @@
             const totalDisplay = document.getElementById(type + 'TotalDisplay');
             const dateDisplay = document.getElementById(type + 'DateDisplay');
             
-            const items = scannedItems.filter(i => i.type === type || (i.status === 'processing' && i.type === 'unknown')); // Show processing in Trips initially or generic
-            
-            // If processing/unknown, default to showing in Trips for visual feedback, 
-            // but actually we should filter properly. For simplicity, unknown goes to Trip list temporarily.
-            // Better logic: Unknown items stay hidden or go to a generic loader? 
-            // Let's put unknowns in Trip list until resolved.
+            // Logic: if unknown, put in trips temporarily
             const displayItems = type === 'trip' 
                 ? scannedItems.filter(i => i.type === 'trip' || i.type === 'unknown') 
                 : scannedItems.filter(i => i.type === 'weekly');
 
-            // Calculate Total
             const total = displayItems.reduce((sum, item) => sum + (item.amount || 0), 0);
             totalDisplay.innerText = total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-            // Determine Date Range to display
-            // If multiple items, try to find unique dates
             const uniqueDates = [...new Set(displayItems.map(i => i.dateLabel).filter(d => d !== 'Scanning...' && d !== 'Unknown Date'))];
             if (uniqueDates.length > 0) {
                 dateDisplay.innerText = uniqueDates.join(' • ');
             } else if (displayItems.length > 0) {
-                 dateDisplay.innerText = displayItems[0].status === 'processing' ? 'SCANNING...' : 'NO DATE FOUND';
+                 dateDisplay.innerText = displayItems[0].status === 'processing' ? 'Processing...' : 'No date found';
             } else {
-                dateDisplay.innerText = 'NO DATA';
+                dateDisplay.innerText = 'No data';
             }
 
-            // HTML Generation for List
             let html = '';
             displayItems.forEach(item => {
                 let statusHtml = '';
-                if (item.status === 'processing') statusHtml = `<span class="animate-pulse">SCANNING...</span>`;
-                else if (item.status === 'error') statusHtml = `<span class="text-red-500">ERROR</span>`;
-                else statusHtml = `$${item.amount.toFixed(2)}`;
+                if (item.status === 'processing') statusHtml = `<span class="animate-pulse text-blue-500">Scanning...</span>`;
+                else if (item.status === 'error') statusHtml = `<span class="text-red-500">Error</span>`;
+                else statusHtml = `+$${item.amount.toFixed(2)}`;
 
                 html += `
-                    <div class="flex items-center justify-between border border-gray-200 dark:border-gray-800 p-2 text-xs">
-                        <div class="flex items-center space-x-2 overflow-hidden">
-                            <div class="w-8 h-8 bg-gray-200 dark:bg-gray-800 bg-cover bg-center flex-shrink-0 grayscale" style="background-image: url('${item.blobUrl}')"></div>
-                            <span class="truncate w-24 opacity-60">${item.fileName}</span>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl fade-enter-active">
+                        <div class="flex items-center space-x-3 overflow-hidden">
+                            <div class="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 bg-cover bg-center flex-shrink-0" style="background-image: url('${item.blobUrl}')"></div>
+                            <div class="flex flex-col min-w-0">
+                                <span class="text-xs font-bold truncate text-gray-900 dark:text-gray-100">${item.fileName}</span>
+                                <span class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">${item.status === 'processing' ? 'Analyzing' : item.type}</span>
+                            </div>
                         </div>
-                        <div class="font-bold flex items-center space-x-2">
-                            <span>${statusHtml}</span>
-                            <button onclick="deleteItem(${item.id})" class="text-red-500 pl-2"><i class="ph ph-trash"></i></button>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-sm font-bold text-gray-900 dark:text-white">${statusHtml}</span>
+                            <button onclick="deleteItem(${item.id})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors bg-white dark:bg-gray-800 rounded-full shadow-sm"><i class="ph-bold ph-trash"></i></button>
                         </div>
                     </div>
                 `;
@@ -304,69 +315,77 @@
 
         // --- AUDIT MODAL ---
         function openAudit(type) {
+            const overlay = document.getElementById('auditOverlay');
+            const card = document.getElementById('auditCard');
             const modal = document.getElementById('auditModal');
             const content = document.getElementById('auditContent');
             const title = document.getElementById('auditTitle');
-            const container = modal.querySelector('div.relative');
             
             const items = scannedItems.filter(i => i.type === type && i.status === 'done');
-            title.innerText = type.toUpperCase() + " BREAKDOWN";
+            title.innerText = type === 'trip' ? 'Trips Breakdown' : 'Weekly Breakdown';
             
-            if (items.length === 0) content.innerHTML = '<p class="text-center opacity-50 py-4">No data recorded.</p>';
+            if (items.length === 0) content.innerHTML = '<p class="text-center opacity-50 py-10">No data available.</p>';
             else {
                 let html = '';
                 items.forEach(item => {
-                    html += `<div class="mb-4 pb-2 border-b border-gray-100 dark:border-gray-800 last:border-0">
-                        <p class="text-[10px] font-bold opacity-50 uppercase mb-1">${item.dateLabel}</p>
+                    html += `<div class="mb-6 last:mb-0">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">${item.dateLabel}</p>
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-3 space-y-2">
                         ${item.rawValues.map(v => `
                             <div class="flex justify-between text-sm">
-                                <span>${v.label}</span>
-                                <span class="font-mono font-bold">+$${v.val.toFixed(2)}</span>
+                                <span class="text-gray-600 dark:text-gray-400 font-medium">${v.label}</span>
+                                <span class="font-mono font-bold text-green-600 dark:text-green-400">+$${v.val.toFixed(2)}</span>
                             </div>
                         `).join('')}
+                        </div>
                     </div>`;
                 });
                 content.innerHTML = html;
             }
 
             modal.classList.remove('hidden');
+            // Small delay to allow display:block to apply before opacity transition
             setTimeout(() => {
-                container.classList.remove('modal-enter');
-                container.classList.add('modal-enter-active');
+                overlay.classList.remove('opacity-0');
+                card.classList.remove('scale-95', 'opacity-0');
+                card.classList.add('scale-100', 'opacity-100');
             }, 10);
         }
 
         function closeAudit() {
+            const overlay = document.getElementById('auditOverlay');
+            const card = document.getElementById('auditCard');
             const modal = document.getElementById('auditModal');
-            const container = modal.querySelector('div.relative');
-            container.classList.remove('modal-enter-active');
-            container.classList.add('modal-exit-active');
+            
+            overlay.classList.add('opacity-0');
+            card.classList.remove('scale-100', 'opacity-100');
+            card.classList.add('scale-95', 'opacity-0');
+            
             setTimeout(() => {
                 modal.classList.add('hidden');
-                container.classList.remove('modal-exit-active');
-                container.classList.add('modal-enter');
-            }, 200);
+            }, 300);
         }
 
         // --- UTILS ---
         function initTheme() {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
-                updateThemeLabel(true);
-            } else updateThemeLabel(false);
+                updateThemeIcon(true);
+            } else updateThemeIcon(false);
         }
         function toggleTheme() {
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.theme = isDark ? 'dark' : 'light';
-            updateThemeLabel(isDark);
+            updateThemeIcon(isDark);
         }
-        function updateThemeLabel(isDark) {
-            document.getElementById('themeLabel').innerText = isDark ? 'Light' : 'Dark';
+        function updateThemeIcon(isDark) {
+            const icon = document.getElementById('themeIcon');
+            icon.className = isDark ? 'ph-fill ph-sun text-yellow-400' : 'ph-fill ph-moon text-gray-600';
         }
         function resetApp() {
-            if(confirm('Reset all data?')) {
+            if(confirm('Reset dashboard?')) {
                 scannedItems = [];
-                localStorage.removeItem('snapcalc_history_v2');
+                localStorage.removeItem('snapcalc_history_v3');
                 render();
             }
         }
@@ -376,16 +395,15 @@
             render();
         }
         function loadHistory() {
-            const stored = localStorage.getItem('snapcalc_history_v2');
+            const stored = localStorage.getItem('snapcalc_history_v3');
             if (stored) {
                 try { scannedItems = JSON.parse(stored); render(); } 
                 catch (e) { console.error(e); }
             }
         }
         function saveHistory() {
-            // Remove blobUrls before saving (too big)
             const toSave = scannedItems.map(i => ({...i, blobUrl: ''}));
-            localStorage.setItem('snapcalc_history_v2', JSON.stringify(toSave));
+            localStorage.setItem('snapcalc_history_v3', JSON.stringify(toSave));
         }
         async function initWorker() {
             try {
@@ -395,7 +413,7 @@
                         if (m.status === 'initialized') status.classList.add('hidden');
                         else {
                             status.classList.remove('hidden');
-                            status.innerText = m.status === 'recognizing text' ? `Scanning ${(m.progress*100).toFixed(0)}%` : 'Loading Engine...';
+                            status.innerText = m.status === 'recognizing text' ? `Scanning...` : 'Loading...';
                         }
                     }
                 });
