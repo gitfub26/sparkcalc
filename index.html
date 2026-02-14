@@ -1,562 +1,962 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
     <meta name="apple-mobile-web-app-capable" content="yes">
+
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <meta name="theme-color" content="#ffffff">
-    <title>GigCalc Unified v3</title>
+
+    <title>SnapCalc Sorted</title>
+
     
+
     <link rel="apple-touch-icon" href="https://img.icons8.com/color/480/calculator--v1.png">
+
     
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <script>
+
         tailwind.config = {
+
             darkMode: 'class',
+
             theme: {
+
                 extend: {
+
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
+
                     colors: {
+
                         ios: {
+
                             bg: '#F2F2F7',
+
                             card: '#FFFFFF',
+
                             text: '#000000',
+
                             darkBg: '#000000',
+
                             darkCard: '#1C1C1E',
+
                             darkText: '#FFFFFF',
+
                         }
+
                     },
+
                     boxShadow: {
+
                         'soft': '0 8px 30px rgba(0,0,0,0.04)',
+
                     }
+
                 }
+
             }
+
         }
+
     </script>
 
+
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
+
     <style>
+
         body { 
+
             -webkit-tap-highlight-color: transparent; 
+
             font-family: 'Inter', sans-serif;
+
         }
+
         .no-scroll::-webkit-scrollbar { display: none; }
+
         .no-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
     </style>
+
 </head>
+
 <body class="bg-ios-bg dark:bg-ios-darkBg text-ios-text dark:text-ios-darkText transition-colors duration-300 flex flex-col h-screen overflow-hidden selection:bg-blue-500 selection:text-white">
 
+
     <div id="globalStatus" class="absolute top-12 right-6 z-50 text-[10px] font-bold text-blue-600 dark:text-blue-400 hidden animate-pulse bg-white dark:bg-gray-800 px-3 py-1.5 rounded-full shadow-sm border border-blue-100 dark:border-blue-900">
+
         Initializing...
+
     </div>
+
 
     <main class="flex-1 overflow-y-auto no-scroll px-5 pt-12 pb-44 flex flex-col space-y-4">
 
+
         <div class="px-1 pb-2">
-            <h1 class="text-2xl font-extrabold tracking-tight">Earnings</h1>
+
+            <h1 class="text-2xl font-extrabold tracking-tight">Dashboard</h1>
+
             <p class="text-xs font-medium text-gray-400 uppercase tracking-wider" id="currentDateDisplay">TODAY</p>
+
         </div>
 
+
         <div class="bg-white dark:bg-ios-darkCard rounded-[32px] p-6 shadow-soft relative overflow-hidden group border border-gray-100 dark:border-gray-800/50">
+
             <div class="flex justify-between items-start mb-2">
+
                 <div class="flex flex-col">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">SPARK (TRIPS)</span>
+
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">TRIPS TOTAL</span>
+
                     <div class="text-left">
+
                         <span class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">$<span id="tripTotalDisplay">0.00</span></span>
+
                     </div>
+
                 </div>
+
                 <div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500">
-                    <i class="ph-fill ph-lightning text-lg"></i>
+
+                    <i class="ph-fill ph-car text-lg"></i>
+
                 </div>
+
             </div>
+
             <div id="tripDateDisplay" class="text-xs font-semibold text-gray-400 mb-4 border-b border-gray-100 dark:border-gray-800 pb-4">No data</div>
+
             <div id="tripList" class="space-y-3"></div>
+
         </div>
 
-        <div class="bg-white dark:bg-ios-darkCard rounded-[32px] p-6 shadow-soft relative overflow-hidden group border border-gray-100 dark:border-gray-800/50">
-            <div class="flex justify-between items-start mb-2">
-                <div class="flex flex-col">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">DOORDASH</span>
-                    <div class="text-left">
-                        <span class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">$<span id="ddTotalDisplay">0.00</span></span>
-                    </div>
-                </div>
-                <div class="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500">
-                    <i class="ph-fill ph-moped text-lg"></i>
-                </div>
-            </div>
-            <div id="ddDateDisplay" class="text-xs font-semibold text-gray-400 mb-4 border-b border-gray-100 dark:border-gray-800 pb-4">No data</div>
-            <div id="ddList" class="space-y-3"></div>
-        </div>
 
         <div class="bg-white dark:bg-ios-darkCard rounded-[32px] p-6 shadow-soft relative overflow-hidden group border border-gray-100 dark:border-gray-800/50">
+
             <div class="flex justify-between items-start mb-2">
+
                 <div class="flex flex-col">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">TOTAL EARNINGS</span>
-                    <button onclick="openGlobalAudit('total')" class="text-left group-active:scale-95 transition-transform origin-left">
-                        <span class="text-4xl font-extrabold tracking-tight text-green-600 dark:text-green-400">$<span id="grandTotalDisplay">0.00</span></span>
+
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">WEEKLY EARNINGS</span>
+
+                    <button onclick="openGlobalAudit('weekly')" class="text-left group-active:scale-95 transition-transform origin-left">
+
+                        <span class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">$<span id="weeklyTotalDisplay">0.00</span></span>
+
                         <i class="ph-bold ph-info text-gray-300 text-lg ml-2 align-top opacity-0 group-hover:opacity-100 transition-opacity"></i>
+
                     </button>
+
                 </div>
+
                 <div class="w-10 h-10 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-500">
-                    <i class="ph-fill ph-wallet text-lg"></i>
+
+                    <i class="ph-fill ph-money text-lg"></i>
+
                 </div>
+
             </div>
-            <div class="text-xs font-semibold text-gray-400 mb-4 border-b border-gray-100 dark:border-gray-800 pb-4">
-                Spark + DoorDash Combined
-            </div>
+
+            <div id="weeklyDateDisplay" class="text-xs font-semibold text-gray-400 mb-4 border-b border-gray-100 dark:border-gray-800 pb-4">No data</div>
+
+            <div id="weeklyList" class="space-y-3"></div>
+
         </div>
+
 
     </main>
 
+
     <div class="fixed bottom-0 left-0 w-full p-5 bg-gradient-to-t from-[#F2F2F7] via-[#F2F2F7] to-transparent dark:from-black dark:via-black z-30 pt-10">
+
         
+
         <div class="grid grid-cols-2 gap-3 mb-3">
+
             <button onclick="toggleTheme()" class="h-[50px] bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-sm flex items-center justify-center space-x-2 active:scale-[0.98] transition-all border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300">
+
                 <i id="themeIcon" class="ph-bold ph-moon text-lg"></i>
+
                 <span id="themeLabel" class="text-xs font-bold uppercase tracking-wider">Dark</span>
+
             </button>
+
 
             <button onclick="resetApp()" class="h-[50px] bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-sm flex items-center justify-center space-x-2 active:scale-[0.98] transition-all border border-red-200 dark:border-red-900/30 text-red-500">
+
                 <i class="ph-bold ph-trash text-lg"></i>
+
                 <span class="text-xs font-bold uppercase tracking-wider">Reset</span>
+
             </button>
+
         </div>
+
 
         <label class="block h-[60px] bg-black dark:bg-white text-white dark:text-black rounded-2xl shadow-xl flex items-center justify-center space-x-2 cursor-pointer active:scale-[0.98] transition-transform">
+
             <i class="ph-bold ph-camera text-xl"></i>
+
             <span class="font-bold text-sm tracking-widest">ADD SCREENSHOT</span>
+
             <form id="uploadForm" class="hidden">
+
                 <input type="file" id="fileInput" accept="image/*" multiple onchange="handleFiles(this.files)">
+
             </form>
+
         </label>
+
     </div>
+
 
     <div id="auditModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+
         <div class="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity opacity-0" id="auditOverlay" onclick="closeAudit()"></div>
+
         <div class="bg-white dark:bg-[#1c1c1e] w-full max-w-sm max-h-[70vh] flex flex-col shadow-2xl rounded-3xl relative z-10 transform scale-95 opacity-0 transition-all duration-200" id="auditCard">
+
             <div class="p-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+
                 <div>
+
                     <h3 class="font-extrabold text-lg tracking-tight" id="auditTitle">Audit</h3>
+
                     <p class="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Detailed Breakdown</p>
+
                 </div>
+
                 <button onclick="closeAudit()" class="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-500"><i class="ph-bold ph-x"></i></button>
+
             </div>
+
             <div class="p-5 overflow-y-auto no-scroll space-y-4" id="auditContent"></div>
+
         </div>
+
     </div>
 
+
     <script>
+
         // --- CONFIG & STATE ---
+
         let scannedItems = []; 
+
         let worker = null;
 
-        // Regex Definitions
-        const SPARK_INDICATOR_REGEX = /(Trip #|Confirmed Weekly Earnings)/i;
-        const DD_INDICATOR_REGEX = /(this dash|Dash|DoorDash)/i;
-        
+
+        // Regex
+
+        const WEEKLY_INDICATOR_REGEX = /(Confirmed Weekly Earnings|Weekly Summary|Pay Statement)/i;
+
         const DATE_SINGLE_REGEX = /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s+([A-Z][a-z]{2})\s+(\d{1,2})(st|nd|rd|th)?\b/i;
+
+        const DATE_RANGE_REGEX = /[A-Z][a-z]{2}\.?\s\d{1,2}\s?-\s?[A-Z][a-z]{2}\.?\s\d{1,2}/;
+
         
-        // Value Extraction
-        const SPARK_TRIP_REGEX = /Trip #(\d+)[\s\S]*?\$([0-9,]+\.[0-9]{2})/gi;
+
+        // Regex for extraction
+
+        const CURRENCY_REGEX = /\$\s?([0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?)/g;
+
+        const TIPS_VAL_REGEX = /Unconfirmed Weekly Tips[\s\S]*?\$([0-9,]+\.[0-9]{2})/i;
+
+        const CONFIRMED_VAL_REGEX = /Confirmed Weekly Earnings[\s\S]*?\$([0-9,]+\.[0-9]{2})/i;
+
         
-        // UPDATED REGEX: Made the dollar sign OPTIONAL using (?:\$)? 
-        // This catches "17.45" even if the OCR missed the "$"
-        // It strictly requires a decimal point followed by 2 digits to avoid integers.
-        const DD_LIST_REGEX = /(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s+[A-Z][a-z]{2}\s+\d{1,2}[\s\S]*?(?:\$)?([0-9,]+\.[0-9]{2})/gi;
-        const GENERIC_CURRENCY_REGEX = /(?:\$)?\s?([0-9]{1,3}(?:,?[0-9]{3})*\.[0-9]{2})/g;
+
+        // NEW: Specific regex to find "Trip #1234 ... $20.00"
+
+        // Captures Group 1: ID, Group 2: Amount
+
+        const TRIP_LINE_REGEX = /Trip #(\d+)[\s\S]*?\$([0-9,]+\.[0-9]{2})/gi;
+
 
         // --- INIT ---
+
         window.addEventListener('DOMContentLoaded', () => {
+
             initTheme();
+
             loadHistory();
+
             initWorker();
+
             document.getElementById('currentDateDisplay').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
         });
 
+
         // --- LOGIC ---
+
         async function handleFiles(files) {
+
             const fileArray = Array.from(files);
+
             document.getElementById('uploadForm').reset();
+
             if (!fileArray.length) return;
+
             
+
             for (let i = 0; i < fileArray.length; i++) {
+
                 scannedItems.push({
+
                     id: Date.now() + Math.random(),
+
                     status: 'processing',
+
                     type: 'unknown',
+
                     file: fileArray[i],
+
                     fileName: fileArray[i].name,
+
                     blobUrl: URL.createObjectURL(fileArray[i]),
+
                     amount: 0,
+
                     dateLabel: 'Reading...',
-                    dateObj: new Date(0),
+
+                    dateObj: new Date(0), // Default to epoch for sorting
+
                     rawValues: []
+
                 });
+
             }
+
             render();
+
             
+
             const newItems = scannedItems.filter(i => i.status === 'processing');
+
             for (const item of newItems) await processImage(item);
+
         }
+
 
         async function processImage(item) {
+
             try {
-                // Auto-invert & Thresholding for high contrast
-                const processedBlob = await preprocessImage(item.file, 1500);
+
+                const resizedBlob = await resizeImage(item.file, 1500);
+
                 if (!worker) await initWorker();
-                const { data: { text } } = await worker.recognize(processedBlob);
 
-                // 1. Identify Type & Date
-                let isSpark = SPARK_INDICATOR_REGEX.test(text);
-                let isDD = DD_INDICATOR_REGEX.test(text) || DD_LIST_REGEX.test(text);
+                const { data: { text } } = await worker.recognize(resizedBlob);
 
-                if (!isSpark && !isDD) {
-                     if (DD_LIST_REGEX.test(text)) isDD = true;
-                }
 
-                item.type = isSpark ? 'spark' : 'doordash';
+                // 1. Identify Type
 
-                // Extract Date
+                let isWeekly = WEEKLY_INDICATOR_REGEX.test(text);
+
+                item.type = isWeekly ? 'weekly' : 'trip';
+
+
+                // 2. Extract Date
+
                 let dateLabel = "Unknown Date";
-                let dateObj = new Date(0);
-                const singleMatch = text.match(DATE_SINGLE_REGEX);
-                if (singleMatch) {
-                    dateLabel = `${singleMatch[2]} ${singleMatch[3]}`; 
-                    dateObj = parseDateStr(dateLabel);
+
+                let dateObj = new Date(0); // For sorting
+
+
+                if (isWeekly) {
+
+                    const rangeMatch = text.match(DATE_RANGE_REGEX);
+
+                    if (rangeMatch) dateLabel = rangeMatch[0];
+
+                    else {
+
+                        const singleMatch = text.match(DATE_SINGLE_REGEX);
+
+                        if (singleMatch) {
+
+                            dateLabel = `${singleMatch[2]} ${singleMatch[3]}`;
+
+                            dateObj = parseDateStr(dateLabel);
+
+                        }
+
+                    }
+
+                } else {
+
+                    const singleMatch = text.match(DATE_SINGLE_REGEX);
+
+                    if (singleMatch) {
+
+                        dateLabel = singleMatch[0]; // e.g. "Mon, Feb 9th"
+
+                        dateObj = parseDateStr(`${singleMatch[2]} ${singleMatch[3]}`);
+
+                    }
+
                 }
+
                 item.dateLabel = dateLabel;
+
                 item.dateObj = dateObj;
 
-                // 2. Extract Money
+
+                // 3. Extract Money & IDs
+
                 let total = 0;
+
                 let values = [];
+
                 let workingText = text;
 
-                if (item.type === 'spark') {
-                    let tripMatches;
-                    SPARK_TRIP_REGEX.lastIndex = 0;
-                    while ((tripMatches = SPARK_TRIP_REGEX.exec(workingText)) !== null) {
-                        const tripID = tripMatches[1];
-                        const val = parseFloat(tripMatches[2].replace(/,/g, ''));
+
+                if (isWeekly) {
+
+                    // Weekly Logic
+
+                    const tipsMatch = workingText.match(TIPS_VAL_REGEX);
+
+                    if (tipsMatch) {
+
+                        const val = parseFloat(tipsMatch[1].replace(/,/g, ''));
+
                         total += val;
-                        values.push({ label: `Trip #${tripID}`, val: val });
+
+                        values.push({ label: "Unconfirmed Tips", val: val });
+
+                        workingText = workingText.replace(tipsMatch[0], '');
+
                     }
+
+                    const earningsMatch = workingText.match(CONFIRMED_VAL_REGEX);
+
+                    if (earningsMatch) {
+
+                        const val = parseFloat(earningsMatch[1].replace(/,/g, ''));
+
+                        total += val;
+
+                        values.push({ label: "Confirmed Earnings", val: val });
+
+                    }
+
                 } else {
-                    // DOORDASH LOGIC
-                    let ddMatches;
-                    DD_LIST_REGEX.lastIndex = 0;
-                    let foundListItems = false;
 
-                    // Try structured list first (Day, Date... Amount)
-                    while ((ddMatches = DD_LIST_REGEX.exec(workingText)) !== null) {
-                        foundListItems = true;
-                        const val = parseFloat(ddMatches[1].replace(/,/g, ''));
+                    // Trip Logic: Try to find "Trip #..." lines first
+
+                    let tripMatches;
+
+                    // Reset regex lastIndex
+
+                    TRIP_LINE_REGEX.lastIndex = 0;
+
+                    
+
+                    while ((tripMatches = TRIP_LINE_REGEX.exec(workingText)) !== null) {
+
+                        const tripID = tripMatches[1];
+
+                        const val = parseFloat(tripMatches[2].replace(/,/g, ''));
+
                         total += val;
-                        values.push({ label: "Dash Order", val: val });
+
+                        values.push({ label: `Trip #${tripID}`, val: val });
+
                     }
 
-                    // Fallback: strict currency scan (now optional $)
-                    if (!foundListItems) {
-                        let matches;
-                        GENERIC_CURRENCY_REGEX.lastIndex = 0;
-                        while ((matches = GENERIC_CURRENCY_REGEX.exec(workingText)) !== null) {
-                            // The capture group [1] is the number part
-                            const valStr = matches[1].replace(/,/g, '');
-                            const val = parseFloat(valStr);
-                            
-                            // Safety checks:
-                            // 1. Must be positive
-                            // 2. Must be < 2000 (avoid phone numbers/errors)
-                            // 3. Must not be "0.00" unless it's the only thing there
-                            if (val < 2000 && val > 0) { 
+
+                    // If no specific trip lines found, fallback to simple money finding
+
+                    // (But only if values is empty, to prevent double counting if the regex missed something weird)
+
+                    if (values.length === 0) {
+
+                        const matches = workingText.match(CURRENCY_REGEX);
+
+                        if (matches) {
+
+                            matches.forEach(m => {
+
+                                const val = parseFloat(m.replace(/[^0-9.]/g, ''));
+
                                 total += val;
-                                values.push({ label: "Dash Amount", val: val });
-                            }
+
+                                values.push({ label: "Trip Amount", val: val });
+
+                            });
+
                         }
+
                     }
+
                 }
 
+
                 item.status = 'done';
+
                 item.amount = total;
+
                 item.rawValues = values;
+
                 
+
                 saveHistory();
+
                 render();
+
             } catch (err) {
+
                 console.error(err);
+
                 item.status = 'error';
+
                 item.dateLabel = 'Error';
+
                 render();
+
             }
+
         }
+
 
         // --- RENDER ---
+
         function render() {
-            renderSection('spark', 'trip');
-            renderSection('doordash', 'dd');
-            renderGrandTotal();
+
+            renderSection('trip');
+
+            renderSection('weekly');
+
         }
 
-        function renderSection(dataType, elementPrefix) {
-            const listEl = document.getElementById(elementPrefix + 'List');
-            const totalDisplay = document.getElementById(elementPrefix + 'TotalDisplay');
-            const dateDisplay = document.getElementById(elementPrefix + 'DateDisplay');
+
+        function renderSection(type) {
+
+            const listEl = document.getElementById(type + 'List');
+
+            const totalDisplay = document.getElementById(type + 'TotalDisplay');
+
+            const dateDisplay = document.getElementById(type + 'DateDisplay');
+
             
-            const displayItems = scannedItems.filter(i => i.type === dataType)
-                                             .sort((a, b) => new Date(b.dateObj) - new Date(a.dateObj));
+
+            // 1. Filter
+
+            let displayItems = type === 'trip' 
+
+                ? scannedItems.filter(i => i.type === 'trip' || i.type === 'unknown') 
+
+                : scannedItems.filter(i => i.type === 'weekly');
+
+
+            // 2. SORT (Newest Date First)
+
+            displayItems.sort((a, b) => new Date(b.dateObj) - new Date(a.dateObj));
+
+
+            // 3. Calc Total
 
             const total = displayItems.reduce((sum, item) => sum + (item.amount || 0), 0);
+
             totalDisplay.innerText = total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+
+            // 4. Update Header Date
+
             const uniqueDates = [...new Set(displayItems.map(i => i.dateLabel).filter(d => d !== 'Reading...' && d !== 'Unknown Date'))];
+
             if (uniqueDates.length > 0) {
+
+                // Show range if multiple dates
+
                 dateDisplay.innerText = uniqueDates.length > 1 ? `${uniqueDates[0]} - ${uniqueDates[uniqueDates.length-1]}` : uniqueDates[0];
+
+            } else if (displayItems.length > 0) {
+
+                 dateDisplay.innerText = displayItems[0].status === 'processing' ? 'Processing...' : 'No date found';
+
             } else {
-                dateDisplay.innerText = displayItems.length > 0 ? 'No date found' : 'No data';
+
+                dateDisplay.innerText = 'No data';
+
             }
+
+
+            // 5. Render List
 
             let html = '';
+
             displayItems.forEach(item => {
+
                 let statusHtml = '';
+
                 if (item.status === 'processing') statusHtml = `<span class="animate-pulse text-blue-500">Scanning...</span>`;
+
                 else if (item.status === 'error') statusHtml = `<span class="text-red-500">Error</span>`;
+
                 else statusHtml = `+$${item.amount.toFixed(2)}`;
 
+
                 const displayLabel = (item.status === 'done' && item.dateLabel !== 'Unknown Date') ? item.dateLabel : item.fileName;
-                const iconClass = dataType === 'spark' ? 'ph-lightning text-blue-500' : 'ph-moped text-red-500';
-                
+
+                const clickAction = `onclick="openSingleItemAudit(${item.id})"`;
+
+                const cursorClass = `cursor-pointer active:scale-[0.98] hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-all`;
+
+
                 html += `
-                    <div onclick="openSingleItemAudit(${item.id})" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 cursor-pointer active:scale-[0.98] transition-all">
+
+                    <div ${clickAction} class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl fade-enter-active border border-gray-100 dark:border-gray-800 ${cursorClass}">
+
                         <div class="flex items-center space-x-3 overflow-hidden">
+
                             <div class="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 bg-cover bg-center flex-shrink-0 border border-gray-200 dark:border-gray-600" style="background-image: url('${item.blobUrl}')"></div>
+
                             <div class="flex flex-col min-w-0">
+
                                 <span class="text-xs font-bold truncate text-gray-900 dark:text-gray-100 flex items-center">
-                                    ${displayLabel} <i class="ph-bold ph-caret-right text-[10px] text-gray-400 ml-1"></i>
+
+                                    ${displayLabel}
+
+                                    ${item.status === 'done' ? '<i class="ph-bold ph-caret-right text-[10px] text-gray-400 ml-1"></i>' : ''}
+
                                 </span>
-                                <span class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-                                    <i class="ph-fill ${iconClass}"></i> ${dataType.toUpperCase()}
-                                </span>
+
+                                <span class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">${item.status === 'processing' ? 'Analyzing' : item.type}</span>
+
                             </div>
+
                         </div>
+
                         <div class="flex items-center space-x-3">
+
                             <span class="text-sm font-bold text-gray-900 dark:text-white">${statusHtml}</span>
+
                             <button onclick="event.stopPropagation(); deleteItem(${item.id})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors bg-white dark:bg-gray-800 rounded-full shadow-sm border border-gray-100 dark:border-gray-700"><i class="ph-bold ph-trash"></i></button>
+
                         </div>
+
                     </div>
+
                 `;
+
             });
+
             listEl.innerHTML = html;
+
         }
 
-        function renderGrandTotal() {
-            const grandTotalEl = document.getElementById('grandTotalDisplay');
-            const total = scannedItems.filter(i => i.status === 'done').reduce((sum, item) => sum + item.amount, 0);
-            grandTotalEl.innerText = total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
 
         // --- AUDIT SYSTEM ---
-        function openGlobalAudit() {
-            const items = scannedItems.filter(i => i.status === 'done')
+
+        function openGlobalAudit(type) {
+
+            // Sort items for global audit too
+
+            const items = scannedItems.filter(i => i.type === type && i.status === 'done')
+
                                       .sort((a, b) => new Date(b.dateObj) - new Date(a.dateObj));
-            renderAuditModal('Grand Total Breakdown', items);
+
+            renderAuditModal(type === 'trip' ? 'Trips Total' : 'Weekly Total', items);
+
         }
+
 
         function openSingleItemAudit(id) {
-            const item = scannedItems.find(i => i.id === id);
-            if(item && item.status === 'done') renderAuditModal(item.dateLabel || 'Details', [item]);
-        }
 
-        function renderAuditModal(titleText, items) {
-            const overlay = document.getElementById('auditOverlay');
-            const card = document.getElementById('auditCard');
-            const modal = document.getElementById('auditModal');
-            const content = document.getElementById('auditContent');
-            const title = document.getElementById('auditTitle');
-            
-            title.innerText = titleText;
-            
-            if (items.length === 0) content.innerHTML = '<p class="text-center opacity-50 py-10">No data available.</p>';
-            else {
-                let html = '';
-                items.forEach(item => {
-                    const typeColor = item.type === 'spark' ? 'text-blue-500' : 'text-red-500';
-                    html += `<div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4">
-                        <div class="flex justify-between items-center mb-2 border-b border-gray-200 dark:border-gray-700 pb-2">
-                            <span class="text-xs font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">${item.dateLabel}</span>
-                            <span class="text-[10px] font-bold ${typeColor} uppercase">${item.type}</span>
-                        </div>
-                        <div class="space-y-1">
-                        ${item.rawValues.map(v => `
-                            <div class="flex justify-between text-xs">
-                                <span class="text-gray-500 dark:text-gray-400 font-medium">${v.label}</span>
-                                <span class="font-mono font-bold text-green-600 dark:text-green-400">+$${v.val.toFixed(2)}</span>
-                            </div>
-                        `).join('')}
-                        </div>
-                    </div>`;
-                });
-                content.innerHTML = html;
+            const item = scannedItems.find(i => i.id === id);
+
+            if(item && item.status === 'done') {
+
+                renderAuditModal(item.dateLabel || 'Details', [item]);
+
             }
 
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                overlay.classList.remove('opacity-0');
-                card.classList.remove('scale-95', 'opacity-0');
-                card.classList.add('scale-100', 'opacity-100');
-            }, 10);
         }
+
+
+        function renderAuditModal(titleText, items) {
+
+            const overlay = document.getElementById('auditOverlay');
+
+            const card = document.getElementById('auditCard');
+
+            const modal = document.getElementById('auditModal');
+
+            const content = document.getElementById('auditContent');
+
+            const title = document.getElementById('auditTitle');
+
+            
+
+            title.innerText = titleText;
+
+            
+
+            if (items.length === 0) content.innerHTML = '<p class="text-center opacity-50 py-10">No data available.</p>';
+
+            else {
+
+                let html = '';
+
+                items.forEach(item => {
+
+                    html += `<div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4">
+
+                        <div class="flex justify-between items-center mb-2 border-b border-gray-200 dark:border-gray-700 pb-2">
+
+                            <span class="text-xs font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">${item.dateLabel}</span>
+
+                        </div>
+
+                        <div class="space-y-1">
+
+                        ${item.rawValues.map(v => `
+
+                            <div class="flex justify-between text-xs">
+
+                                <span class="text-gray-500 dark:text-gray-400 font-medium">${v.label}</span>
+
+                                <span class="font-mono font-bold text-green-600 dark:text-green-400">+$${v.val.toFixed(2)}</span>
+
+                            </div>
+
+                        `).join('')}
+
+                        </div>
+
+                    </div>`;
+
+                });
+
+                content.innerHTML = html;
+
+            }
+
+
+            modal.classList.remove('hidden');
+
+            setTimeout(() => {
+
+                overlay.classList.remove('opacity-0');
+
+                card.classList.remove('scale-95', 'opacity-0');
+
+                card.classList.add('scale-100', 'opacity-100');
+
+            }, 10);
+
+        }
+
 
         function closeAudit() {
+
             const overlay = document.getElementById('auditOverlay');
+
             const card = document.getElementById('auditCard');
+
             const modal = document.getElementById('auditModal');
+
             
+
             overlay.classList.add('opacity-0');
+
             card.classList.remove('scale-100', 'opacity-100');
+
             card.classList.add('scale-95', 'opacity-0');
+
             
+
             setTimeout(() => { modal.classList.add('hidden'); }, 200);
+
         }
+
 
         // --- UTILS ---
+
         function parseDateStr(str) {
+
+            // Helper to parse "Feb 9" or "Feb 9 2026"
+
             const currentYear = new Date().getFullYear();
+
             return new Date(`${str} ${currentYear}`);
+
         }
 
+
         function initTheme() {
+
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+
                 document.documentElement.classList.add('dark');
+
                 updateThemeUI(true);
+
             } else updateThemeUI(false);
+
         }
 
         function toggleTheme() {
+
             const isDark = document.documentElement.classList.toggle('dark');
+
             localStorage.theme = isDark ? 'dark' : 'light';
+
             updateThemeUI(isDark);
+
         }
 
         function updateThemeUI(isDark) {
+
             const icon = document.getElementById('themeIcon');
+
             const label = document.getElementById('themeLabel');
+
             if (isDark) {
+
                 icon.className = 'ph-bold ph-sun text-yellow-400 text-lg';
+
                 label.innerText = 'Light';
+
             } else {
+
                 icon.className = 'ph-bold ph-moon text-gray-600 text-lg';
+
                 label.innerText = 'Dark';
+
             }
+
         }
 
         function resetApp() {
+
             if(confirm('Reset all data?')) {
+
                 scannedItems = [];
-                localStorage.removeItem('gigcalc_history_v3');
+
+                localStorage.removeItem('snapcalc_history_v6');
+
                 render();
+
             }
+
         }
 
         function deleteItem(id) {
+
             scannedItems = scannedItems.filter(i => i.id !== id);
+
             saveHistory();
+
             render();
+
         }
 
         function loadHistory() {
-            const stored = localStorage.getItem('gigcalc_history_v3');
+
+            const stored = localStorage.getItem('snapcalc_history_v6');
+
             if (stored) {
+
                 try { scannedItems = JSON.parse(stored); render(); } 
+
                 catch (e) { console.error(e); }
+
             }
+
         }
 
         function saveHistory() {
+
             const toSave = scannedItems.map(i => ({...i, blobUrl: ''}));
-            localStorage.setItem('gigcalc_history_v3', JSON.stringify(toSave));
+
+            localStorage.setItem('snapcalc_history_v6', JSON.stringify(toSave));
+
         }
 
         async function initWorker() {
+
             try {
+
                 worker = await Tesseract.createWorker('eng', 1, {
+
                     logger: m => { 
+
                         const status = document.getElementById('globalStatus');
+
                         if (m.status === 'initialized') status.classList.add('hidden');
+
                         else {
+
                             status.classList.remove('hidden');
+
                             status.innerText = m.status === 'recognizing text' ? `Scanning...` : 'Loading...';
+
                         }
+
                     }
+
                 });
+
             } catch (e) { console.error(e); }
+
         }
 
-        // IMAGE PRE-PROCESSING: Resize -> Invert -> Threshold (Binarize)
-        function preprocessImage(file, maxWidth) {
+        function resizeImage(file, maxWidth) {
+
             return new Promise((resolve, reject) => {
+
                 const img = new Image();
+
                 img.src = URL.createObjectURL(file);
+
                 img.onload = () => {
-                    // 1. Resize
+
                     const scale = maxWidth / img.width;
-                    const width = maxWidth; 
-                    const height = img.height * scale;
-                    
+
+                    if (scale >= 1) { resolve(file); return; }
+
                     const canvas = document.createElement('canvas');
-                    canvas.width = width; 
-                    canvas.height = height;
+
+                    canvas.width = maxWidth; canvas.height = img.height * scale;
+
                     const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    // 2. Process Pixels
-                    const imageData = ctx.getImageData(0, 0, width, height);
-                    const data = imageData.data;
-                    let r, g, b, avg;
-                    let colorSum = 0;
-                    
-                    // Calculate avg brightness first
-                    for (let x = 0, len = data.length; x < len; x += 40) {
-                        r = data[x]; g = data[x+1]; b = data[x+2];
-                        colorSum += Math.floor((r + g + b) / 3);
-                    }
-                    const brightness = Math.floor(colorSum / (data.length / 40));
-                    const isDark = brightness < 128;
 
-                    // Apply Invert (if dark) AND Threshold (always)
-                    for (let i = 0; i < data.length; i += 4) {
-                        r = data[i]; g = data[i+1]; b = data[i+2];
-                        
-                        // If dark mode, invert first
-                        if (isDark) {
-                            r = 255 - r;
-                            g = 255 - g;
-                            b = 255 - b;
-                        }
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                        // Convert to Grayscale
-                        let gray = (r * 0.299 + g * 0.587 + b * 0.114);
-
-                        // Thresholding (Binarize): Make it purely Black or White
-                        // This removes fuzzy gray edges around numbers
-                        let val = gray > 140 ? 255 : 0;
-
-                        data[i] = val;     // R
-                        data[i+1] = val;   // G
-                        data[i+2] = val;   // B
-                        // Alpha remains 255
-                    }
-                    
-                    ctx.putImageData(imageData, 0, 0);
                     canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.9);
+
                 };
+
                 img.onerror = reject;
+
             });
+
         }
+
     </script>
+
 </body>
-</html>
+
+</html> 
