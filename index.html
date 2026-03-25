@@ -1,962 +1,966 @@
- <!DOCTYPE html>
-
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Earnings">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<title>Earnings</title>
+<style>
+  :root {
+    --bg: #f2f2f7;
+    --bg2: #ffffff;
+    --bg3: #e5e5ea;
+    --surface: rgba(255,255,255,0.72);
+    --surface2: rgba(242,242,247,0.8);
+    --label: #000000;
+    --label2: #3c3c43;
+    --label3: rgba(60,60,67,0.6);
+    --sep: rgba(60,60,67,0.18);
+    --accent: #007aff;
+    --accent2: #34c759;
+    --accent3: #ff9500;
+    --danger: #ff3b30;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --blur: blur(20px) saturate(180%);
+    --shadow: 0 2px 20px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #000000;
+      --bg2: #1c1c1e;
+      --bg3: #2c2c2e;
+      --surface: rgba(28,28,30,0.82);
+      --surface2: rgba(44,44,46,0.8);
+      --label: #ffffff;
+      --label2: #ebebf5;
+      --label3: rgba(235,235,245,0.6);
+      --sep: rgba(84,84,88,0.65);
+      --shadow: 0 2px 20px rgba(0,0,0,0.4);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #000000;
+    --bg2: #1c1c1e;
+    --bg3: #2c2c2e;
+    --surface: rgba(28,28,30,0.82);
+    --surface2: rgba(44,44,46,0.8);
+    --label: #ffffff;
+    --label2: #ebebf5;
+    --label3: rgba(235,235,245,0.6);
+    --sep: rgba(84,84,88,0.65);
+    --shadow: 0 2px 20px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { height: 100%; }
+  body {
+    font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background: var(--bg);
+    color: var(--label);
+    min-height: 100%;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 
-    <meta charset="UTF-8">
+  /* HEADER */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--surface);
+    -webkit-backdrop-filter: var(--blur);
+    backdrop-filter: var(--blur);
+    border-bottom: 0.5px solid var(--sep);
+    padding: 52px 20px 14px;
+    padding-top: max(52px, calc(44px + env(safe-area-inset-top)));
+  }
+  .header-row { display: flex; align-items: flex-end; justify-content: space-between; }
+  .header h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.5px; }
+  .header-actions { display: flex; gap: 8px; }
+  .icon-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--bg3); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.15s;
+    color: var(--accent);
+  }
+  .icon-btn:active { opacity: 0.5; }
+  .icon-btn svg { width: 16px; height: 16px; }
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  /* TABS */
+  .tabs {
+    display: flex; gap: 0;
+    background: var(--bg3);
+    border-radius: 9px;
+    padding: 2px;
+    margin: 12px 20px 0;
+  }
+  .tab {
+    flex: 1; border: none; background: transparent; cursor: pointer;
+    padding: 7px 0; border-radius: 7px;
+    font-size: 13px; font-weight: 600;
+    color: var(--label3);
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: var(--bg2);
+    color: var(--label);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.12);
+  }
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
+  /* SCROLL AREA */
+  .scroll { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
 
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  /* CARD */
+  .card {
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow);
+  }
+  .card-label {
+    font-size: 13px; font-weight: 600; color: var(--label3);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+  }
+  .card-value {
+    font-size: 42px; font-weight: 700; letter-spacing: -1px;
+    color: var(--label); line-height: 1;
+  }
+  .card-value.green { color: var(--accent2); }
+  .card-value.orange { color: var(--accent3); }
+  .card-sub { font-size: 13px; color: var(--label3); margin-top: 4px; }
 
-    <meta name="theme-color" content="#ffffff">
+  /* GOAL PROGRESS */
+  .goal-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .goal-pct { font-size: 15px; font-weight: 600; color: var(--accent2); }
+  .progress-track {
+    width: 100%; height: 8px; background: var(--bg3);
+    border-radius: 100px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 100px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    min-width: 0;
+  }
+  .progress-fill.over { background: linear-gradient(90deg, var(--accent2), #30d158); }
+  .goal-edit-row {
+    display: flex; align-items: center; gap: 8px; margin-top: 12px;
+  }
+  .goal-edit-row label { font-size: 13px; color: var(--label3); white-space: nowrap; }
+  .goal-input {
+    flex: 1; background: var(--bg3); border: none; border-radius: 8px;
+    padding: 8px 10px; font-size: 15px; color: var(--label);
+    font-family: inherit; -webkit-appearance: none;
+  }
+  .goal-input:focus { outline: 2px solid var(--accent); }
 
-    <title>SnapCalc Sorted</title>
+  /* SHIFT */
+  .shift-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .shift-field { display: flex; flex-direction: column; gap: 4px; }
+  .shift-field label { font-size: 12px; color: var(--label3); font-weight: 500; }
+  .shift-input {
+    background: var(--bg3); border: none; border-radius: 8px;
+    padding: 8px 10px; font-size: 15px; color: var(--label);
+    font-family: inherit; -webkit-appearance: none; width: 100%;
+  }
+  .shift-input:focus { outline: 2px solid var(--accent); }
+  .shift-result {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--bg3); border-radius: 10px; padding: 12px 14px;
+  }
+  .shift-result-label { font-size: 13px; color: var(--label3); }
+  .shift-result-val { font-size: 20px; font-weight: 700; color: var(--accent2); }
 
-    
+  /* TRIPS LIST */
+  .section-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 4px;
+  }
+  .section-title { font-size: 20px; font-weight: 700; }
+  .count-badge {
+    background: var(--accent); color: white;
+    font-size: 12px; font-weight: 600;
+    padding: 2px 8px; border-radius: 100px;
+  }
 
-    <link rel="apple-touch-icon" href="https://img.icons8.com/color/480/calculator--v1.png">
+  .trip-list { display: flex; flex-direction: column; gap: 0; }
+  .trip-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0;
+    border-bottom: 0.5px solid var(--sep);
+    animation: slideIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  .trip-item:last-child { border-bottom: none; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+  .trip-left { display: flex; flex-direction: column; gap: 2px; }
+  .trip-name { font-size: 15px; font-weight: 500; color: var(--label); }
+  .trip-status { font-size: 12px; color: var(--label3); }
+  .trip-status.completed { color: var(--accent2); }
+  .trip-status.canceled { color: var(--danger); }
+  .trip-amount { font-size: 17px; font-weight: 600; color: var(--label); }
+  .trip-delete {
+    background: none; border: none; color: var(--danger);
+    font-size: 18px; cursor: pointer; padding: 4px 0 4px 12px;
+    opacity: 0.6; transition: opacity 0.15s;
+  }
+  .trip-delete:active { opacity: 1; }
 
-    
+  /* UPLOAD BTN */
+  .upload-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 16px;
+    background: var(--accent); color: white;
+    border: none; border-radius: var(--radius);
+    font-size: 17px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+    box-shadow: 0 4px 16px rgba(0,122,255,0.3);
+  }
+  .upload-btn:active { transform: scale(0.97); opacity: 0.85; }
+  .upload-btn svg { width: 20px; height: 20px; }
 
-    <script src="https://cdn.tailwindcss.com"></script>
+  /* RESET */
+  .reset-btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%; padding: 14px;
+    background: transparent; color: var(--danger);
+    border: 1.5px solid var(--danger);
+    border-radius: var(--radius); font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+    opacity: 0.75;
+  }
+  .reset-btn:active { opacity: 0.4; }
 
-    <script>
+  /* SUMMARY ROW */
+  .summary-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .summary-card {
+    background: var(--bg2); border-radius: var(--radius-sm);
+    padding: 14px; box-shadow: var(--shadow);
+  }
+  .summary-card .s-label { font-size: 12px; color: var(--label3); font-weight: 500; margin-bottom: 2px; }
+  .summary-card .s-val { font-size: 22px; font-weight: 700; }
+  .summary-card .s-val.green { color: var(--accent2); }
+  .summary-card .s-val.blue { color: var(--accent); }
 
-        tailwind.config = {
+  /* MODAL */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.5);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: flex-end;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-backdrop.hidden { display: none; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    width: 100%; background: var(--bg2);
+    border-radius: 20px 20px 0 0;
+    padding: 12px 20px 32px;
+    padding-bottom: max(32px, calc(20px + env(safe-area-inset-bottom)));
+    animation: slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .modal-handle {
+    width: 36px; height: 4px; background: var(--sep);
+    border-radius: 100px; margin: 0 auto 16px;
+  }
+  .modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+  .modal-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .modal-field label { font-size: 13px; color: var(--label3); font-weight: 500; }
+  .modal-input {
+    background: var(--bg3); border: none; border-radius: 10px;
+    padding: 12px 14px; font-size: 16px; color: var(--label);
+    font-family: inherit; width: 100%; -webkit-appearance: none;
+  }
+  .modal-input:focus { outline: 2px solid var(--accent); }
+  .modal-row { display: flex; gap: 8px; margin-top: 4px; }
+  .modal-btn {
+    flex: 1; padding: 14px; border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .modal-btn.primary { background: var(--accent); color: white; }
+  .modal-btn.secondary { background: var(--bg3); color: var(--label); }
+  .modal-btn:active { opacity: 0.7; }
 
-            darkMode: 'class',
+  /* EMPTY STATE */
+  .empty {
+    text-align: center; padding: 32px 20px; color: var(--label3);
+    font-size: 15px; line-height: 1.5;
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 8px; }
 
-            theme: {
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+    background: var(--label); color: var(--bg);
+    padding: 10px 18px; border-radius: 100px;
+    font-size: 14px; font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    z-index: 999; white-space: nowrap;
+    animation: toastIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.9); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  }
 
-                extend: {
+  /* PROCESSING */
+  .processing {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 14px; background: var(--bg3); border-radius: 10px;
+    color: var(--label3); font-size: 14px;
+  }
+  .spinner {
+    width: 16px; height: 16px; border: 2px solid var(--sep);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+  /* FILE INPUT hidden */
+  #fileInput { display: none; }
 
-                    colors: {
-
-                        ios: {
-
-                            bg: '#F2F2F7',
-
-                            card: '#FFFFFF',
-
-                            text: '#000000',
-
-                            darkBg: '#000000',
-
-                            darkCard: '#1C1C1E',
-
-                            darkText: '#FFFFFF',
-
-                        }
-
-                    },
-
-                    boxShadow: {
-
-                        'soft': '0 8px 30px rgba(0,0,0,0.04)',
-
-                    }
-
-                }
-
-            }
-
-        }
-
-    </script>
-
-
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
-
-    <style>
-
-        body { 
-
-            -webkit-tap-highlight-color: transparent; 
-
-            font-family: 'Inter', sans-serif;
-
-        }
-
-        .no-scroll::-webkit-scrollbar { display: none; }
-
-        .no-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-
-    </style>
-
+  /* PAGE */
+  .page { display: none; }
+  .page.active { display: block; }
+</style>
 </head>
+<body>
 
-<body class="bg-ios-bg dark:bg-ios-darkBg text-ios-text dark:text-ios-darkText transition-colors duration-300 flex flex-col h-screen overflow-hidden selection:bg-blue-500 selection:text-white">
+<input type="file" id="fileInput" accept="image/*" multiple capture="environment">
 
-
-    <div id="globalStatus" class="absolute top-12 right-6 z-50 text-[10px] font-bold text-blue-600 dark:text-blue-400 hidden animate-pulse bg-white dark:bg-gray-800 px-3 py-1.5 rounded-full shadow-sm border border-blue-100 dark:border-blue-900">
-
-        Initializing...
-
+<!-- HEADER -->
+<div class="header">
+  <div class="header-row">
+    <h1>Earnings</h1>
+    <div class="header-actions">
+      <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+      <button class="icon-btn" onclick="showResetConfirm()" title="Reset">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/>
+        </svg>
+      </button>
     </div>
-
-
-    <main class="flex-1 overflow-y-auto no-scroll px-5 pt-12 pb-44 flex flex-col space-y-4">
-
-
-        <div class="px-1 pb-2">
-
-            <h1 class="text-2xl font-extrabold tracking-tight">Dashboard</h1>
-
-            <p class="text-xs font-medium text-gray-400 uppercase tracking-wider" id="currentDateDisplay">TODAY</p>
-
-        </div>
-
-
-        <div class="bg-white dark:bg-ios-darkCard rounded-[32px] p-6 shadow-soft relative overflow-hidden group border border-gray-100 dark:border-gray-800/50">
-
-            <div class="flex justify-between items-start mb-2">
-
-                <div class="flex flex-col">
-
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">TRIPS TOTAL</span>
-
-                    <div class="text-left">
-
-                        <span class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">$<span id="tripTotalDisplay">0.00</span></span>
-
-                    </div>
-
-                </div>
-
-                <div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500">
-
-                    <i class="ph-fill ph-car text-lg"></i>
-
-                </div>
-
-            </div>
-
-            <div id="tripDateDisplay" class="text-xs font-semibold text-gray-400 mb-4 border-b border-gray-100 dark:border-gray-800 pb-4">No data</div>
-
-            <div id="tripList" class="space-y-3"></div>
-
-        </div>
-
-
-        <div class="bg-white dark:bg-ios-darkCard rounded-[32px] p-6 shadow-soft relative overflow-hidden group border border-gray-100 dark:border-gray-800/50">
-
-            <div class="flex justify-between items-start mb-2">
-
-                <div class="flex flex-col">
-
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">WEEKLY EARNINGS</span>
-
-                    <button onclick="openGlobalAudit('weekly')" class="text-left group-active:scale-95 transition-transform origin-left">
-
-                        <span class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">$<span id="weeklyTotalDisplay">0.00</span></span>
-
-                        <i class="ph-bold ph-info text-gray-300 text-lg ml-2 align-top opacity-0 group-hover:opacity-100 transition-opacity"></i>
-
-                    </button>
-
-                </div>
-
-                <div class="w-10 h-10 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-500">
-
-                    <i class="ph-fill ph-money text-lg"></i>
-
-                </div>
-
-            </div>
-
-            <div id="weeklyDateDisplay" class="text-xs font-semibold text-gray-400 mb-4 border-b border-gray-100 dark:border-gray-800 pb-4">No data</div>
-
-            <div id="weeklyList" class="space-y-3"></div>
-
-        </div>
-
-
-    </main>
-
-
-    <div class="fixed bottom-0 left-0 w-full p-5 bg-gradient-to-t from-[#F2F2F7] via-[#F2F2F7] to-transparent dark:from-black dark:via-black z-30 pt-10">
-
-        
-
-        <div class="grid grid-cols-2 gap-3 mb-3">
-
-            <button onclick="toggleTheme()" class="h-[50px] bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-sm flex items-center justify-center space-x-2 active:scale-[0.98] transition-all border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300">
-
-                <i id="themeIcon" class="ph-bold ph-moon text-lg"></i>
-
-                <span id="themeLabel" class="text-xs font-bold uppercase tracking-wider">Dark</span>
-
-            </button>
-
-
-            <button onclick="resetApp()" class="h-[50px] bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-sm flex items-center justify-center space-x-2 active:scale-[0.98] transition-all border border-red-200 dark:border-red-900/30 text-red-500">
-
-                <i class="ph-bold ph-trash text-lg"></i>
-
-                <span class="text-xs font-bold uppercase tracking-wider">Reset</span>
-
-            </button>
-
-        </div>
-
-
-        <label class="block h-[60px] bg-black dark:bg-white text-white dark:text-black rounded-2xl shadow-xl flex items-center justify-center space-x-2 cursor-pointer active:scale-[0.98] transition-transform">
-
-            <i class="ph-bold ph-camera text-xl"></i>
-
-            <span class="font-bold text-sm tracking-widest">ADD SCREENSHOT</span>
-
-            <form id="uploadForm" class="hidden">
-
-                <input type="file" id="fileInput" accept="image/*" multiple onchange="handleFiles(this.files)">
-
-            </form>
-
-        </label>
-
+  </div>
+  <div class="tabs" style="margin-top:14px;">
+    <button class="tab active" onclick="switchTab('summary')">Summary</button>
+    <button class="tab" onclick="switchTab('trips')">Trips</button>
+    <button class="tab" onclick="switchTab('shift')">Shift</button>
+  </div>
+</div>
+
+<!-- SUMMARY TAB -->
+<div id="tab-summary" class="page active scroll">
+
+  <!-- TOTAL CARD -->
+  <div class="card">
+    <div class="card-label">Today's Earnings</div>
+    <div class="card-value green" id="totalDisplay">$0.00</div>
+    <div class="card-sub" id="tripCountSub">0 completed trips</div>
+  </div>
+
+  <!-- GOAL CARD -->
+  <div class="card">
+    <div class="card-label">Daily Goal</div>
+    <div class="goal-row">
+      <div class="card-value" id="goalDisplay" style="font-size:28px;">$0 / $<span id="goalTarget">100</span></div>
+      <div class="goal-pct" id="goalPct">0%</div>
     </div>
-
-
-    <div id="auditModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity opacity-0" id="auditOverlay" onclick="closeAudit()"></div>
-
-        <div class="bg-white dark:bg-[#1c1c1e] w-full max-w-sm max-h-[70vh] flex flex-col shadow-2xl rounded-3xl relative z-10 transform scale-95 opacity-0 transition-all duration-200" id="auditCard">
-
-            <div class="p-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-
-                <div>
-
-                    <h3 class="font-extrabold text-lg tracking-tight" id="auditTitle">Audit</h3>
-
-                    <p class="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Detailed Breakdown</p>
-
-                </div>
-
-                <button onclick="closeAudit()" class="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-500"><i class="ph-bold ph-x"></i></button>
-
-            </div>
-
-            <div class="p-5 overflow-y-auto no-scroll space-y-4" id="auditContent"></div>
-
-        </div>
-
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
     </div>
-
-
-    <script>
-
-        // --- CONFIG & STATE ---
-
-        let scannedItems = []; 
-
-        let worker = null;
-
-
-        // Regex
-
-        const WEEKLY_INDICATOR_REGEX = /(Confirmed Weekly Earnings|Weekly Summary|Pay Statement)/i;
-
-        const DATE_SINGLE_REGEX = /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s+([A-Z][a-z]{2})\s+(\d{1,2})(st|nd|rd|th)?\b/i;
-
-        const DATE_RANGE_REGEX = /[A-Z][a-z]{2}\.?\s\d{1,2}\s?-\s?[A-Z][a-z]{2}\.?\s\d{1,2}/;
-
-        
-
-        // Regex for extraction
-
-        const CURRENCY_REGEX = /\$\s?([0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?)/g;
-
-        const TIPS_VAL_REGEX = /Unconfirmed Weekly Tips[\s\S]*?\$([0-9,]+\.[0-9]{2})/i;
-
-        const CONFIRMED_VAL_REGEX = /Confirmed Weekly Earnings[\s\S]*?\$([0-9,]+\.[0-9]{2})/i;
-
-        
-
-        // NEW: Specific regex to find "Trip #1234 ... $20.00"
-
-        // Captures Group 1: ID, Group 2: Amount
-
-        const TRIP_LINE_REGEX = /Trip #(\d+)[\s\S]*?\$([0-9,]+\.[0-9]{2})/gi;
-
-
-        // --- INIT ---
-
-        window.addEventListener('DOMContentLoaded', () => {
-
-            initTheme();
-
-            loadHistory();
-
-            initWorker();
-
-            document.getElementById('currentDateDisplay').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-
-        });
-
-
-        // --- LOGIC ---
-
-        async function handleFiles(files) {
-
-            const fileArray = Array.from(files);
-
-            document.getElementById('uploadForm').reset();
-
-            if (!fileArray.length) return;
-
-            
-
-            for (let i = 0; i < fileArray.length; i++) {
-
-                scannedItems.push({
-
-                    id: Date.now() + Math.random(),
-
-                    status: 'processing',
-
-                    type: 'unknown',
-
-                    file: fileArray[i],
-
-                    fileName: fileArray[i].name,
-
-                    blobUrl: URL.createObjectURL(fileArray[i]),
-
-                    amount: 0,
-
-                    dateLabel: 'Reading...',
-
-                    dateObj: new Date(0), // Default to epoch for sorting
-
-                    rawValues: []
-
-                });
-
-            }
-
-            render();
-
-            
-
-            const newItems = scannedItems.filter(i => i.status === 'processing');
-
-            for (const item of newItems) await processImage(item);
-
-        }
-
-
-        async function processImage(item) {
-
-            try {
-
-                const resizedBlob = await resizeImage(item.file, 1500);
-
-                if (!worker) await initWorker();
-
-                const { data: { text } } = await worker.recognize(resizedBlob);
-
-
-                // 1. Identify Type
-
-                let isWeekly = WEEKLY_INDICATOR_REGEX.test(text);
-
-                item.type = isWeekly ? 'weekly' : 'trip';
-
-
-                // 2. Extract Date
-
-                let dateLabel = "Unknown Date";
-
-                let dateObj = new Date(0); // For sorting
-
-
-                if (isWeekly) {
-
-                    const rangeMatch = text.match(DATE_RANGE_REGEX);
-
-                    if (rangeMatch) dateLabel = rangeMatch[0];
-
-                    else {
-
-                        const singleMatch = text.match(DATE_SINGLE_REGEX);
-
-                        if (singleMatch) {
-
-                            dateLabel = `${singleMatch[2]} ${singleMatch[3]}`;
-
-                            dateObj = parseDateStr(dateLabel);
-
-                        }
-
-                    }
-
-                } else {
-
-                    const singleMatch = text.match(DATE_SINGLE_REGEX);
-
-                    if (singleMatch) {
-
-                        dateLabel = singleMatch[0]; // e.g. "Mon, Feb 9th"
-
-                        dateObj = parseDateStr(`${singleMatch[2]} ${singleMatch[3]}`);
-
-                    }
-
-                }
-
-                item.dateLabel = dateLabel;
-
-                item.dateObj = dateObj;
-
-
-                // 3. Extract Money & IDs
-
-                let total = 0;
-
-                let values = [];
-
-                let workingText = text;
-
-
-                if (isWeekly) {
-
-                    // Weekly Logic
-
-                    const tipsMatch = workingText.match(TIPS_VAL_REGEX);
-
-                    if (tipsMatch) {
-
-                        const val = parseFloat(tipsMatch[1].replace(/,/g, ''));
-
-                        total += val;
-
-                        values.push({ label: "Unconfirmed Tips", val: val });
-
-                        workingText = workingText.replace(tipsMatch[0], '');
-
-                    }
-
-                    const earningsMatch = workingText.match(CONFIRMED_VAL_REGEX);
-
-                    if (earningsMatch) {
-
-                        const val = parseFloat(earningsMatch[1].replace(/,/g, ''));
-
-                        total += val;
-
-                        values.push({ label: "Confirmed Earnings", val: val });
-
-                    }
-
-                } else {
-
-                    // Trip Logic: Try to find "Trip #..." lines first
-
-                    let tripMatches;
-
-                    // Reset regex lastIndex
-
-                    TRIP_LINE_REGEX.lastIndex = 0;
-
-                    
-
-                    while ((tripMatches = TRIP_LINE_REGEX.exec(workingText)) !== null) {
-
-                        const tripID = tripMatches[1];
-
-                        const val = parseFloat(tripMatches[2].replace(/,/g, ''));
-
-                        total += val;
-
-                        values.push({ label: `Trip #${tripID}`, val: val });
-
-                    }
-
-
-                    // If no specific trip lines found, fallback to simple money finding
-
-                    // (But only if values is empty, to prevent double counting if the regex missed something weird)
-
-                    if (values.length === 0) {
-
-                        const matches = workingText.match(CURRENCY_REGEX);
-
-                        if (matches) {
-
-                            matches.forEach(m => {
-
-                                const val = parseFloat(m.replace(/[^0-9.]/g, ''));
-
-                                total += val;
-
-                                values.push({ label: "Trip Amount", val: val });
-
-                            });
-
-                        }
-
-                    }
-
-                }
-
-
-                item.status = 'done';
-
-                item.amount = total;
-
-                item.rawValues = values;
-
-                
-
-                saveHistory();
-
-                render();
-
-            } catch (err) {
-
-                console.error(err);
-
-                item.status = 'error';
-
-                item.dateLabel = 'Error';
-
-                render();
-
-            }
-
-        }
-
-
-        // --- RENDER ---
-
-        function render() {
-
-            renderSection('trip');
-
-            renderSection('weekly');
-
-        }
-
-
-        function renderSection(type) {
-
-            const listEl = document.getElementById(type + 'List');
-
-            const totalDisplay = document.getElementById(type + 'TotalDisplay');
-
-            const dateDisplay = document.getElementById(type + 'DateDisplay');
-
-            
-
-            // 1. Filter
-
-            let displayItems = type === 'trip' 
-
-                ? scannedItems.filter(i => i.type === 'trip' || i.type === 'unknown') 
-
-                : scannedItems.filter(i => i.type === 'weekly');
-
-
-            // 2. SORT (Newest Date First)
-
-            displayItems.sort((a, b) => new Date(b.dateObj) - new Date(a.dateObj));
-
-
-            // 3. Calc Total
-
-            const total = displayItems.reduce((sum, item) => sum + (item.amount || 0), 0);
-
-            totalDisplay.innerText = total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-
-            // 4. Update Header Date
-
-            const uniqueDates = [...new Set(displayItems.map(i => i.dateLabel).filter(d => d !== 'Reading...' && d !== 'Unknown Date'))];
-
-            if (uniqueDates.length > 0) {
-
-                // Show range if multiple dates
-
-                dateDisplay.innerText = uniqueDates.length > 1 ? `${uniqueDates[0]} - ${uniqueDates[uniqueDates.length-1]}` : uniqueDates[0];
-
-            } else if (displayItems.length > 0) {
-
-                 dateDisplay.innerText = displayItems[0].status === 'processing' ? 'Processing...' : 'No date found';
-
-            } else {
-
-                dateDisplay.innerText = 'No data';
-
-            }
-
-
-            // 5. Render List
-
-            let html = '';
-
-            displayItems.forEach(item => {
-
-                let statusHtml = '';
-
-                if (item.status === 'processing') statusHtml = `<span class="animate-pulse text-blue-500">Scanning...</span>`;
-
-                else if (item.status === 'error') statusHtml = `<span class="text-red-500">Error</span>`;
-
-                else statusHtml = `+$${item.amount.toFixed(2)}`;
-
-
-                const displayLabel = (item.status === 'done' && item.dateLabel !== 'Unknown Date') ? item.dateLabel : item.fileName;
-
-                const clickAction = `onclick="openSingleItemAudit(${item.id})"`;
-
-                const cursorClass = `cursor-pointer active:scale-[0.98] hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-all`;
-
-
-                html += `
-
-                    <div ${clickAction} class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl fade-enter-active border border-gray-100 dark:border-gray-800 ${cursorClass}">
-
-                        <div class="flex items-center space-x-3 overflow-hidden">
-
-                            <div class="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 bg-cover bg-center flex-shrink-0 border border-gray-200 dark:border-gray-600" style="background-image: url('${item.blobUrl}')"></div>
-
-                            <div class="flex flex-col min-w-0">
-
-                                <span class="text-xs font-bold truncate text-gray-900 dark:text-gray-100 flex items-center">
-
-                                    ${displayLabel}
-
-                                    ${item.status === 'done' ? '<i class="ph-bold ph-caret-right text-[10px] text-gray-400 ml-1"></i>' : ''}
-
-                                </span>
-
-                                <span class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">${item.status === 'processing' ? 'Analyzing' : item.type}</span>
-
-                            </div>
-
-                        </div>
-
-                        <div class="flex items-center space-x-3">
-
-                            <span class="text-sm font-bold text-gray-900 dark:text-white">${statusHtml}</span>
-
-                            <button onclick="event.stopPropagation(); deleteItem(${item.id})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors bg-white dark:bg-gray-800 rounded-full shadow-sm border border-gray-100 dark:border-gray-700"><i class="ph-bold ph-trash"></i></button>
-
-                        </div>
-
-                    </div>
-
-                `;
-
-            });
-
-            listEl.innerHTML = html;
-
-        }
-
-
-        // --- AUDIT SYSTEM ---
-
-        function openGlobalAudit(type) {
-
-            // Sort items for global audit too
-
-            const items = scannedItems.filter(i => i.type === type && i.status === 'done')
-
-                                      .sort((a, b) => new Date(b.dateObj) - new Date(a.dateObj));
-
-            renderAuditModal(type === 'trip' ? 'Trips Total' : 'Weekly Total', items);
-
-        }
-
-
-        function openSingleItemAudit(id) {
-
-            const item = scannedItems.find(i => i.id === id);
-
-            if(item && item.status === 'done') {
-
-                renderAuditModal(item.dateLabel || 'Details', [item]);
-
-            }
-
-        }
-
-
-        function renderAuditModal(titleText, items) {
-
-            const overlay = document.getElementById('auditOverlay');
-
-            const card = document.getElementById('auditCard');
-
-            const modal = document.getElementById('auditModal');
-
-            const content = document.getElementById('auditContent');
-
-            const title = document.getElementById('auditTitle');
-
-            
-
-            title.innerText = titleText;
-
-            
-
-            if (items.length === 0) content.innerHTML = '<p class="text-center opacity-50 py-10">No data available.</p>';
-
-            else {
-
-                let html = '';
-
-                items.forEach(item => {
-
-                    html += `<div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4">
-
-                        <div class="flex justify-between items-center mb-2 border-b border-gray-200 dark:border-gray-700 pb-2">
-
-                            <span class="text-xs font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">${item.dateLabel}</span>
-
-                        </div>
-
-                        <div class="space-y-1">
-
-                        ${item.rawValues.map(v => `
-
-                            <div class="flex justify-between text-xs">
-
-                                <span class="text-gray-500 dark:text-gray-400 font-medium">${v.label}</span>
-
-                                <span class="font-mono font-bold text-green-600 dark:text-green-400">+$${v.val.toFixed(2)}</span>
-
-                            </div>
-
-                        `).join('')}
-
-                        </div>
-
-                    </div>`;
-
-                });
-
-                content.innerHTML = html;
-
-            }
-
-
-            modal.classList.remove('hidden');
-
-            setTimeout(() => {
-
-                overlay.classList.remove('opacity-0');
-
-                card.classList.remove('scale-95', 'opacity-0');
-
-                card.classList.add('scale-100', 'opacity-100');
-
-            }, 10);
-
-        }
-
-
-        function closeAudit() {
-
-            const overlay = document.getElementById('auditOverlay');
-
-            const card = document.getElementById('auditCard');
-
-            const modal = document.getElementById('auditModal');
-
-            
-
-            overlay.classList.add('opacity-0');
-
-            card.classList.remove('scale-100', 'opacity-100');
-
-            card.classList.add('scale-95', 'opacity-0');
-
-            
-
-            setTimeout(() => { modal.classList.add('hidden'); }, 200);
-
-        }
-
-
-        // --- UTILS ---
-
-        function parseDateStr(str) {
-
-            // Helper to parse "Feb 9" or "Feb 9 2026"
-
-            const currentYear = new Date().getFullYear();
-
-            return new Date(`${str} ${currentYear}`);
-
-        }
-
-
-        function initTheme() {
-
-            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-
-                document.documentElement.classList.add('dark');
-
-                updateThemeUI(true);
-
-            } else updateThemeUI(false);
-
-        }
-
-        function toggleTheme() {
-
-            const isDark = document.documentElement.classList.toggle('dark');
-
-            localStorage.theme = isDark ? 'dark' : 'light';
-
-            updateThemeUI(isDark);
-
-        }
-
-        function updateThemeUI(isDark) {
-
-            const icon = document.getElementById('themeIcon');
-
-            const label = document.getElementById('themeLabel');
-
-            if (isDark) {
-
-                icon.className = 'ph-bold ph-sun text-yellow-400 text-lg';
-
-                label.innerText = 'Light';
-
-            } else {
-
-                icon.className = 'ph-bold ph-moon text-gray-600 text-lg';
-
-                label.innerText = 'Dark';
-
-            }
-
-        }
-
-        function resetApp() {
-
-            if(confirm('Reset all data?')) {
-
-                scannedItems = [];
-
-                localStorage.removeItem('snapcalc_history_v6');
-
-                render();
-
-            }
-
-        }
-
-        function deleteItem(id) {
-
-            scannedItems = scannedItems.filter(i => i.id !== id);
-
-            saveHistory();
-
-            render();
-
-        }
-
-        function loadHistory() {
-
-            const stored = localStorage.getItem('snapcalc_history_v6');
-
-            if (stored) {
-
-                try { scannedItems = JSON.parse(stored); render(); } 
-
-                catch (e) { console.error(e); }
-
-            }
-
-        }
-
-        function saveHistory() {
-
-            const toSave = scannedItems.map(i => ({...i, blobUrl: ''}));
-
-            localStorage.setItem('snapcalc_history_v6', JSON.stringify(toSave));
-
-        }
-
-        async function initWorker() {
-
-            try {
-
-                worker = await Tesseract.createWorker('eng', 1, {
-
-                    logger: m => { 
-
-                        const status = document.getElementById('globalStatus');
-
-                        if (m.status === 'initialized') status.classList.add('hidden');
-
-                        else {
-
-                            status.classList.remove('hidden');
-
-                            status.innerText = m.status === 'recognizing text' ? `Scanning...` : 'Loading...';
-
-                        }
-
-                    }
-
-                });
-
-            } catch (e) { console.error(e); }
-
-        }
-
-        function resizeImage(file, maxWidth) {
-
-            return new Promise((resolve, reject) => {
-
-                const img = new Image();
-
-                img.src = URL.createObjectURL(file);
-
-                img.onload = () => {
-
-                    const scale = maxWidth / img.width;
-
-                    if (scale >= 1) { resolve(file); return; }
-
-                    const canvas = document.createElement('canvas');
-
-                    canvas.width = maxWidth; canvas.height = img.height * scale;
-
-                    const ctx = canvas.getContext('2d');
-
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                    canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.9);
-
-                };
-
-                img.onerror = reject;
-
-            });
-
-        }
-
-    </script>
-
+    <div class="goal-edit-row">
+      <label>Goal $</label>
+      <input class="goal-input" type="number" id="goalInput" placeholder="100" min="1" max="9999" inputmode="decimal">
+    </div>
+  </div>
+
+  <!-- SUMMARY STATS -->
+  <div class="summary-row">
+    <div class="summary-card">
+      <div class="s-label">Avg Per Trip</div>
+      <div class="s-val blue" id="avgTrip">$0.00</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">Trips Today</div>
+      <div class="s-val" id="tripCountCard">0</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">Highest Trip</div>
+      <div class="s-val green" id="highTrip">$0.00</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">Canceled</div>
+      <div class="s-val" style="color:var(--danger)" id="canceledCount">0</div>
+    </div>
+  </div>
+
+  <!-- UPLOAD -->
+  <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>
+    Add Screenshot
+  </button>
+
+  <div id="processingIndicator" class="processing" style="display:none;">
+    <div class="spinner"></div>
+    <span>Reading screenshot…</span>
+  </div>
+
+</div>
+
+<!-- TRIPS TAB -->
+<div id="tab-trips" class="page scroll">
+  <div class="section-header">
+    <div class="section-title">All Trips</div>
+    <div class="count-badge" id="tripBadge">0</div>
+  </div>
+  <div class="card">
+    <div class="trip-list" id="tripList">
+      <div class="empty">
+        <div class="empty-icon">📋</div>
+        No trips yet. Add a screenshot to get started.
+      </div>
+    </div>
+  </div>
+  <button class="upload-btn" onclick="document.getElementById('fileInput').click()" style="margin-top:4px;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>
+    Add Screenshot
+  </button>
+</div>
+
+<!-- SHIFT TAB -->
+<div id="tab-shift" class="page scroll">
+  <div class="card">
+    <div class="card-label" style="margin-bottom:12px;">Shift Calculator</div>
+    <div class="shift-grid">
+      <div class="shift-field">
+        <label>Clock In</label>
+        <input class="shift-input" type="time" id="shiftStart">
+      </div>
+      <div class="shift-field">
+        <label>Clock Out</label>
+        <input class="shift-input" type="time" id="shiftEnd">
+      </div>
+    </div>
+    <div class="shift-result">
+      <div>
+        <div class="shift-result-label">Hourly Rate</div>
+        <div class="shift-result-label" id="shiftDuration" style="margin-top:2px; font-size:11px;">— hrs</div>
+      </div>
+      <div class="shift-result-val" id="hourlyRate">$0.00/hr</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label" style="margin-bottom:12px;">Shift History</div>
+    <div id="shiftHistory">
+      <div class="empty">
+        <div class="empty-icon">⏱️</div>
+        No shifts logged yet.
+      </div>
+    </div>
+    <button class="upload-btn" onclick="saveShift()" style="margin-top:12px; background:var(--accent2); box-shadow:0 4px 16px rgba(52,199,89,0.3);">
+      Save This Shift
+    </button>
+  </div>
+</div>
+
+<!-- MANUAL ADD MODAL -->
+<div class="modal-backdrop hidden" id="manualModal" onclick="closeManual(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>Add Trip Manually</h2>
+    <div class="modal-field">
+      <label>Trip Name / ID</label>
+      <input class="modal-input" type="text" id="manualName" placeholder="Trip #1234">
+    </div>
+    <div class="modal-field">
+      <label>Amount ($)</label>
+      <input class="modal-input" type="number" id="manualAmount" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+    </div>
+    <div class="modal-field">
+      <label>Status</label>
+      <select class="modal-input" id="manualStatus">
+        <option value="Completed">Completed</option>
+        <option value="Canceled">Canceled</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <button class="modal-btn secondary" onclick="document.getElementById('manualModal').classList.add('hidden')">Cancel</button>
+      <button class="modal-btn primary" onclick="addManualTrip()">Add Trip</button>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let state = {
+  trips: [],
+  goal: 100,
+  shifts: []
+};
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('gigearnings_v2');
+    if (s) state = { ...state, ...JSON.parse(s) };
+  } catch(e) {}
+}
+
+function saveState() {
+  try { localStorage.setItem('gigearnings_v2', JSON.stringify(state)); } catch(e) {}
+}
+
+// ─── TABS ─────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── UI UPDATE ────────────────────────────────────────────
+function updateUI() {
+  const completed = state.trips.filter(t => t.status !== 'Canceled');
+  const canceled = state.trips.filter(t => t.status === 'Canceled');
+  const total = completed.reduce((s, t) => s + t.amount, 0);
+  const goal = parseFloat(state.goal) || 100;
+  const pct = Math.min((total / goal) * 100, 100);
+  const avg = completed.length ? total / completed.length : 0;
+  const high = completed.length ? Math.max(...completed.map(t => t.amount)) : 0;
+
+  // Summary
+  document.getElementById('totalDisplay').textContent = fmt(total);
+  document.getElementById('tripCountSub').textContent =
+    `${completed.length} completed trip${completed.length !== 1 ? 's' : ''}`;
+  document.getElementById('goalDisplay').innerHTML =
+    `${fmt(total)} / $<span id="goalTarget">${goal}</span>`;
+  document.getElementById('goalPct').textContent = Math.round(pct) + '%';
+  const fill = document.getElementById('progressFill');
+  fill.style.width = pct + '%';
+  fill.className = 'progress-fill' + (total >= goal ? ' over' : '');
+  document.getElementById('goalInput').value = state.goal;
+
+  document.getElementById('avgTrip').textContent = fmt(avg);
+  document.getElementById('tripCountCard').textContent = completed.length;
+  document.getElementById('highTrip').textContent = fmt(high);
+  document.getElementById('canceledCount').textContent = canceled.length;
+
+  // Trips list
+  const list = document.getElementById('tripList');
+  const badge = document.getElementById('tripBadge');
+  badge.textContent = state.trips.length;
+
+  if (state.trips.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">📋</div>No trips yet. Add a screenshot to get started.</div>`;
+  } else {
+    list.innerHTML = state.trips.map((t, i) => `
+      <div class="trip-item">
+        <div class="trip-left">
+          <div class="trip-name">${escHtml(t.name)}</div>
+          <div class="trip-status ${t.status.toLowerCase()}">${t.status}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0">
+          ${t.status !== 'Canceled' ? `<div class="trip-amount">${fmt(t.amount)}</div>` : `<div class="trip-amount" style="color:var(--label3)">—</div>`}
+          <button class="trip-delete" onclick="deleteTrip(${i})" title="Remove">×</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Shift rate
+  calcShift();
+
+  // Shift history
+  renderShiftHistory();
+}
+
+function fmt(n) {
+  return '$' + n.toFixed(2);
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── GOAL ─────────────────────────────────────────────────
+document.getElementById('goalInput').addEventListener('input', function() {
+  state.goal = parseFloat(this.value) || 100;
+  saveState();
+  updateUI();
+});
+
+// ─── FILE INPUT ───────────────────────────────────────────
+document.getElementById('fileInput').addEventListener('change', async function() {
+  const files = Array.from(this.files);
+  if (!files.length) return;
+  this.value = '';
+  for (const file of files) {
+    await processImage(file);
+  }
+});
+
+// ─── OCR via Tesseract.js (loads from CDN once, cached) ──
+let tesseractReady = false;
+function loadTesseract() {
+  return new Promise((res, rej) => {
+    if (window.Tesseract) { res(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    s.onload = () => res();
+    s.onerror = () => rej(new Error('Tesseract failed to load'));
+    document.head.appendChild(s);
+  });
+}
+
+// ─── IMAGE PRE-PROCESSING ────────────────────────────────
+// Scale to ~1200px wide and boost contrast so OCR reads cleanly
+function preprocessForOCR(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const TARGET_W = 1200;
+      const scale = img.width < TARGET_W ? (TARGET_W / img.width) : 1;
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+
+      // White background (helps with light-mode screenshots)
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+
+      // Boost contrast slightly — helps faint grey text stand out
+      const imageData = ctx.getImageData(0, 0, w, h);
+      const d = imageData.data;
+      const contrast = 1.4; // 1.0 = no change, 1.4 = 40% boost
+      const intercept = 128 * (1 - contrast);
+      for (let i = 0; i < d.length; i += 4) {
+        d[i]     = Math.min(255, Math.max(0, d[i]     * contrast + intercept));
+        d[i + 1] = Math.min(255, Math.max(0, d[i + 1] * contrast + intercept));
+        d[i + 2] = Math.min(255, Math.max(0, d[i + 2] * contrast + intercept));
+      }
+      ctx.putImageData(imageData, 0, 0);
+
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+async function processImage(file) {
+  const pi = document.getElementById('processingIndicator');
+  pi.style.display = 'flex';
+  pi.querySelector('span') && (pi.querySelector('span').textContent = 'Loading OCR engine…');
+
+  try {
+    await loadTesseract();
+
+    // Update status text
+    const statusSpan = pi.childNodes[1];
+    if (statusSpan) statusSpan.textContent = 'Reading screenshot…';
+
+    const worker = await Tesseract.createWorker('eng', 1, {
+      logger: () => {}
+    });
+    // PSM 6 = assume a single uniform block of text (best for list UIs)
+    await worker.setParameters({ tessedit_pageseg_mode: '6' });
+
+    // Pre-process image on canvas for better OCR accuracy
+    const processedDataUrl = await preprocessForOCR(file);
+    const { data: { text } } = await worker.recognize(processedDataUrl);
+    await worker.terminate();
+
+    console.log('OCR raw text:\n', text); // debug
+
+    const trips = parseTripsFromText(text);
+
+    if (trips.length === 0) {
+      toast('No trips found — try adding manually');
+      document.getElementById('manualModal').classList.remove('hidden');
+    } else {
+      const existingNames = new Set(state.trips.map(t => t.name));
+      const added = trips.filter(t => !existingNames.has(t.name));
+      const dupes = trips.length - added.length;
+      state.trips = [...state.trips, ...added];
+      saveState();
+      updateUI();
+      const msg = dupes > 0
+        ? `Added ${added.length} trip${added.length !== 1 ? 's' : ''} (${dupes} dupe${dupes !== 1 ? 's' : ''} skipped)`
+        : `Added ${added.length} trip${added.length !== 1 ? 's' : ''} ✓`;
+      toast(msg);
+    }
+  } catch(err) {
+    console.error('OCR error:', err);
+    toast('Could not read image — add manually');
+    document.getElementById('manualModal').classList.remove('hidden');
+  } finally {
+    pi.style.display = 'none';
+  }
+}
+
+// ─── PARSE OCR TEXT → TRIPS ──────────────────────────────
+function parseTripsFromText(raw) {
+  console.log('--- RAW OCR ---\n', raw, '\n--- END ---');
+
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  const seen = new Set();
+  const trips = [];
+
+  // PASS 1 — single-line format (DoorDash puts everything on one line):
+  // "Trip #8392 + 1 Order Estimate $22.53"
+  // followed by a separate "Completed" or "Canceled" line
+  // We pair each trip-number line with the nearest following status line.
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const tripMatch = line.match(/#(\d{3,6})/);
+    if (!tripMatch) continue;
+
+    const name = 'Trip #' + tripMatch[1];
+    if (seen.has(name)) { continue; }
+    seen.add(name);
+
+    // Amount — try "Estimate $22.53" on the SAME line first
+    let amount = 0;
+    const estSame = line.match(/[Ee]stimate\s*\$?\s*(\d+\.\d{2})/);
+    if (estSame) {
+      amount = parseFloat(estSame[1]);
+    } else {
+      // Any XX.XX on the same line
+      const nums = [...line.matchAll(/\b(\d{1,3}\.\d{2})\b/g)]
+        .map(m => parseFloat(m[1])).filter(n => n >= 1 && n < 500);
+      if (nums.length) amount = Math.max(...nums);
+    }
+
+    // Status — look at the next 1-3 lines
+    let status = 'Completed';
+    for (let j = i + 1; j <= Math.min(lines.length - 1, i + 3); j++) {
+      if (/cancel/i.test(lines[j])) { status = 'Canceled'; amount = 0; break; }
+      if (/complet|delivered/i.test(lines[j])) { status = 'Completed'; break; }
+    }
+
+    trips.push({ name, amount, status });
+  }
+
+  // PASS 2 — fallback: scan Estimate lines in case trip# wasn't on same line
+  if (trips.length === 0) {
+    lines.forEach((line, i) => {
+      const est = line.match(/[Ee]stimate\s*\$?\s*(\d+\.\d{2})/);
+      if (!est) return;
+      const amount = parseFloat(est[1]);
+      const ctx = lines.slice(Math.max(0, i - 3), Math.min(lines.length, i + 4)).join(' ');
+      const nm = ctx.match(/#(\d{3,6})/);
+      const name = nm ? 'Trip #' + nm[1] : 'Trip ' + (trips.length + 1);
+      if (trips.find(t => t.name === name)) return;
+      const status = /cancel/i.test(ctx) ? 'Canceled' : 'Completed';
+      trips.push({ name, amount, status });
+    });
+  }
+
+  console.log('Parsed trips:', trips);
+  return trips;
+}
+
+// ─── MANUAL ADD ───────────────────────────────────────────
+function addManualTrip() {
+  const name = document.getElementById('manualName').value.trim() || 'Trip';
+  const amount = parseFloat(document.getElementById('manualAmount').value) || 0;
+  const status = document.getElementById('manualStatus').value;
+  state.trips.push({ name, amount, status });
+  saveState();
+  updateUI();
+  document.getElementById('manualModal').classList.add('hidden');
+  document.getElementById('manualName').value = '';
+  document.getElementById('manualAmount').value = '';
+  toast(`Added ${name} ✓`);
+}
+
+function closeManual(e) {
+  if (e.target === e.currentTarget) document.getElementById('manualModal').classList.add('hidden');
+}
+
+// ─── DELETE TRIP ─────────────────────────────────────────
+function deleteTrip(i) {
+  state.trips.splice(i, 1);
+  saveState();
+  updateUI();
+}
+
+// ─── RESET ────────────────────────────────────────────────
+function showResetConfirm() {
+  state.trips = [];
+  state.shifts = [];
+  saveState();
+  updateUI();
+  document.getElementById('shiftStart').value = '';
+  document.getElementById('shiftEnd').value = '';
+  toast('Reset complete');
+}
+
+// ─── SHIFT CALC ───────────────────────────────────────────
+document.getElementById('shiftStart').addEventListener('change', calcShift);
+document.getElementById('shiftEnd').addEventListener('change', calcShift);
+
+function calcShift() {
+  const start = document.getElementById('shiftStart').value;
+  const end = document.getElementById('shiftEnd').value;
+  const rateEl = document.getElementById('hourlyRate');
+  const durEl = document.getElementById('shiftDuration');
+
+  if (!start || !end) {
+    rateEl.textContent = '$0.00/hr';
+    durEl.textContent = '— hrs';
+    return;
+  }
+
+  const [sh, sm] = start.split(':').map(Number);
+  let [eh, em] = end.split(':').map(Number);
+  let startMins = sh * 60 + sm;
+  let endMins = eh * 60 + em;
+  if (endMins <= startMins) endMins += 24 * 60; // overnight
+  const hours = (endMins - startMins) / 60;
+
+  const completed = state.trips.filter(t => t.status !== 'Canceled');
+  const total = completed.reduce((s, t) => s + t.amount, 0);
+  const rate = hours > 0 ? total / hours : 0;
+
+  rateEl.textContent = fmt(rate) + '/hr';
+  durEl.textContent = hours.toFixed(1) + ' hrs worked';
+}
+
+function saveShift() {
+  const start = document.getElementById('shiftStart').value;
+  const end = document.getElementById('shiftEnd').value;
+  if (!start || !end) { toast('Set start and end time first'); return; }
+
+  const [sh, sm] = start.split(':').map(Number);
+  let [eh, em] = end.split(':').map(Number);
+  let startMins = sh * 60 + sm;
+  let endMins = eh * 60 + em;
+  if (endMins <= startMins) endMins += 24 * 60;
+  const hours = (endMins - startMins) / 60;
+
+  const completed = state.trips.filter(t => t.status !== 'Canceled');
+  const total = completed.reduce((s, t) => s + t.amount, 0);
+  const rate = hours > 0 ? total / hours : 0;
+
+  const now = new Date();
+  state.shifts.unshift({
+    date: now.toLocaleDateString('en-US', { month:'short', day:'numeric' }),
+    start, end,
+    hours: hours.toFixed(1),
+    earnings: total,
+    rate: rate.toFixed(2)
+  });
+  if (state.shifts.length > 20) state.shifts = state.shifts.slice(0, 20);
+  saveState();
+  renderShiftHistory();
+  toast('Shift saved ✓');
+}
+
+function renderShiftHistory() {
+  const el = document.getElementById('shiftHistory');
+  if (!state.shifts.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">⏱️</div>No shifts logged yet.</div>`;
+    return;
+  }
+  el.innerHTML = state.shifts.map((s, i) => `
+    <div class="trip-item">
+      <div class="trip-left">
+        <div class="trip-name">${escHtml(s.date)}</div>
+        <div class="trip-status completed">${escHtml(s.start)} – ${escHtml(s.end)} · ${s.hours}hrs</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0;">
+        <div style="text-align:right;">
+          <div class="trip-amount">${fmt(parseFloat(s.earnings))}</div>
+          <div style="font-size:11px;color:var(--label3)">$${s.rate}/hr</div>
+        </div>
+        <button class="trip-delete" onclick="deleteShift(${i})" title="Remove">×</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteShift(i) {
+  state.shifts.splice(i, 1);
+  saveState();
+  renderShiftHistory();
+}
+
+// ─── TOAST ────────────────────────────────────────────────
+let toastTimer;
+function toast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  clearTimeout(toastTimer);
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  toastTimer = setTimeout(() => el.remove(), 2800);
+}
+
+// ─── THEME ────────────────────────────────────────────────
+const MOON_SVG = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+const SUN_SVG  = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  // Show sun (switch to light) when dark, moon (switch to dark) when light
+  document.getElementById('themeIcon').innerHTML = theme === 'dark' ? SUN_SVG : MOON_SVG;
+  try { localStorage.setItem('gigearnings_theme', theme); } catch(e) {}
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  // If no explicit theme, detect system preference
+  const effective = current || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  applyTheme(effective === 'dark' ? 'light' : 'dark');
+}
+
+function initTheme() {
+  const saved = (() => { try { return localStorage.getItem('gigearnings_theme'); } catch(e) { return null; } })();
+  if (saved) { applyTheme(saved); return; }
+  // No saved pref — follow system, just set the icon correctly
+  const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.getElementById('themeIcon').innerHTML = sysDark ? SUN_SVG : MOON_SVG;
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+initTheme();
+loadState();
+updateUI();
+</script>
 </body>
-
-</html> 
+</html>
