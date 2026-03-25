@@ -117,32 +117,32 @@
   }
 
   /* SCROLL AREA */
-  .scroll { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .scroll { padding: 20px 20px 40px; display: flex; flex-direction: column; gap: 18px; }
 
   /* CARD */
   .card {
     background: var(--bg2);
     border-radius: var(--radius);
-    padding: 18px;
+    padding: 22px;
     box-shadow: var(--shadow);
   }
   .card-label {
-    font-size: 13px; font-weight: 600; color: var(--label3);
-    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+    font-size: 12px; font-weight: 600; color: var(--label3);
+    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;
   }
   .card-value {
-    font-size: 42px; font-weight: 700; letter-spacing: -1px;
+    font-size: 52px; font-weight: 700; letter-spacing: -1.5px;
     color: var(--label); line-height: 1;
   }
   .card-value.green { color: var(--accent2); }
   .card-value.orange { color: var(--accent3); }
-  .card-sub { font-size: 13px; color: var(--label3); margin-top: 4px; }
+  .card-sub { font-size: 14px; color: var(--label3); margin-top: 8px; }
 
   /* GOAL PROGRESS */
-  .goal-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .goal-pct { font-size: 15px; font-weight: 600; color: var(--accent2); }
+  .goal-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .goal-pct { font-size: 17px; font-weight: 700; color: var(--accent2); }
   .progress-track {
-    width: 100%; height: 8px; background: var(--bg3);
+    width: 100%; height: 10px; background: var(--bg3);
     border-radius: 100px; overflow: hidden;
   }
   .progress-fill {
@@ -153,32 +153,32 @@
   }
   .progress-fill.over { background: linear-gradient(90deg, var(--accent2), #30d158); }
   .goal-edit-row {
-    display: flex; align-items: center; gap: 8px; margin-top: 12px;
+    display: flex; align-items: center; gap: 10px; margin-top: 18px;
   }
   .goal-edit-row label { font-size: 13px; color: var(--label3); white-space: nowrap; }
   .goal-input {
-    flex: 1; background: var(--bg3); border: none; border-radius: 8px;
-    padding: 8px 10px; font-size: 15px; color: var(--label);
+    flex: 1; background: var(--bg3); border: none; border-radius: 10px;
+    padding: 12px 14px; font-size: 16px; color: var(--label);
     font-family: inherit; -webkit-appearance: none;
   }
   .goal-input:focus { outline: 2px solid var(--accent); }
 
   /* SHIFT */
-  .shift-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .shift-field { display: flex; flex-direction: column; gap: 4px; }
+  .shift-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+  .shift-field { display: flex; flex-direction: column; gap: 8px; }
   .shift-field label { font-size: 12px; color: var(--label3); font-weight: 500; }
   .shift-input {
-    background: var(--bg3); border: none; border-radius: 8px;
-    padding: 8px 10px; font-size: 15px; color: var(--label);
+    background: var(--bg3); border: none; border-radius: 10px;
+    padding: 14px 12px; font-size: 16px; color: var(--label);
     font-family: inherit; -webkit-appearance: none; width: 100%;
   }
   .shift-input:focus { outline: 2px solid var(--accent); }
   .shift-result {
     display: flex; justify-content: space-between; align-items: center;
-    background: var(--bg3); border-radius: 10px; padding: 12px 14px;
+    background: var(--bg3); border-radius: 14px; padding: 20px 18px;
   }
-  .shift-result-label { font-size: 13px; color: var(--label3); }
-  .shift-result-val { font-size: 20px; font-weight: 700; color: var(--accent2); }
+  .shift-result-label { font-size: 14px; color: var(--label3); font-weight: 500; }
+  .shift-result-val { font-size: 28px; font-weight: 700; color: var(--accent2); letter-spacing: -0.5px; }
 
   /* TRIPS LIST */
   .section-header {
@@ -195,7 +195,7 @@
   .trip-list { display: flex; flex-direction: column; gap: 0; }
   .trip-item {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 0;
+    padding: 18px 0;
     border-bottom: 0.5px solid var(--sep);
     animation: slideIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
   }
@@ -220,7 +220,7 @@
   /* UPLOAD BTN */
   .upload-btn {
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; padding: 16px;
+    width: 100%; padding: 18px;
     background: var(--accent); color: white;
     border: none; border-radius: var(--radius);
     font-size: 17px; font-weight: 600;
@@ -243,13 +243,13 @@
   .reset-btn:active { opacity: 0.4; }
 
   /* SUMMARY ROW */
-  .summary-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .summary-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .summary-card {
-    background: var(--bg2); border-radius: var(--radius-sm);
-    padding: 14px; box-shadow: var(--shadow);
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 20px 18px; box-shadow: var(--shadow);
   }
-  .summary-card .s-label { font-size: 12px; color: var(--label3); font-weight: 500; margin-bottom: 2px; }
-  .summary-card .s-val { font-size: 22px; font-weight: 700; }
+  .summary-card .s-label { font-size: 12px; color: var(--label3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+  .summary-card .s-val { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
   .summary-card .s-val.green { color: var(--accent2); }
   .summary-card .s-val.blue { color: var(--accent); }
 
@@ -382,7 +382,7 @@
   <div class="card">
     <div class="card-label">Daily Goal</div>
     <div class="goal-row">
-      <div class="card-value" id="goalDisplay" style="font-size:28px;">$0 / $<span id="goalTarget">100</span></div>
+      <div class="card-value" id="goalDisplay" style="font-size:34px;">$0 / $<span id="goalTarget">100</span></div>
       <div class="goal-pct" id="goalPct">0%</div>
     </div>
     <div class="progress-track">
@@ -456,7 +456,7 @@
 <!-- SHIFT TAB -->
 <div id="tab-shift" class="page scroll">
   <div class="card">
-    <div class="card-label" style="margin-bottom:12px;">Shift Calculator</div>
+    <div class="card-label" style="margin-bottom:20px;">Shift Calculator</div>
     <div class="shift-grid">
       <div class="shift-field">
         <label>Clock In</label>
@@ -470,14 +470,14 @@
     <div class="shift-result">
       <div>
         <div class="shift-result-label">Hourly Rate</div>
-        <div class="shift-result-label" id="shiftDuration" style="margin-top:2px; font-size:11px;">— hrs</div>
+        <div class="shift-result-label" id="shiftDuration" style="margin-top:6px; font-size:13px; opacity:0.7;">— hrs</div>
       </div>
       <div class="shift-result-val" id="hourlyRate">$0.00/hr</div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-label" style="margin-bottom:12px;">Shift History</div>
+    <div class="card-label" style="margin-bottom:20px;">Shift History</div>
     <div id="shiftHistory">
       <div class="empty">
         <div class="empty-icon">⏱️</div>
