@@ -393,6 +393,35 @@
     margin-left: 6px; vertical-align: middle;
   }
 
+
+  /* BONUS SECTION in trips list */
+  .bonus-section {
+    background: linear-gradient(135deg, rgba(255,149,0,0.08), rgba(255,149,0,0.04));
+    border-radius: 12px;
+    padding: 4px 12px;
+    margin-bottom: 4px;
+    border: 1px solid rgba(255,149,0,0.18);
+  }
+  .bonus-item .trip-name { color: var(--label); font-weight: 600; }
+  .bonus-tag {
+    color: #ff9500 !important;
+    font-weight: 600;
+  }
+  .bonus-amount {
+    color: #ff9500 !important;
+    font-weight: 700;
+    font-size: 17px;
+  }
+  .bonus-divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 14px 0 4px;
+    color: var(--label3); font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .bonus-divider::before, .bonus-divider::after {
+    content: ''; flex: 1; height: 0.5px; background: var(--sep);
+  }
+
   /* TOAST */
   .toast {
     position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
@@ -656,18 +685,31 @@ function switchTab(name) {
 
 // ─── UI UPDATE ────────────────────────────────────────────
 function updateUI() {
-  const completed = state.trips.filter(t => t.status !== 'Canceled');
-  const canceled = state.trips.filter(t => t.status === 'Canceled');
-  const total = completed.reduce((s, t) => s + t.amount, 0);
-  const goal = parseFloat(state.goal) || 100;
-  const pct = Math.min((total / goal) * 100, 100);
-  const avg = completed.length ? total / completed.length : 0;
-  const high = completed.length ? Math.max(...completed.map(t => t.amount)) : 0;
+  // Separate manual bonus entries from real trips
+  const manuals  = state.trips.filter(t => t.manual);
+  const realTrips = state.trips.filter(t => !t.manual);
 
-  // Summary
+  const completedTrips = realTrips.filter(t => t.status !== 'Canceled');
+  const canceled       = realTrips.filter(t => t.status === 'Canceled');
+  const bonusTotal     = manuals.reduce((s, t) => s + t.amount, 0);
+  const tripsTotal     = completedTrips.reduce((s, t) => s + t.amount, 0);
+  const total          = tripsTotal + bonusTotal;         // grand total for earnings display
+
+  const goal = parseFloat(state.goal) || 100;
+  const pct  = Math.min((total / goal) * 100, 100);
+
+  // Avg and high are trips-only (no bonuses)
+  const avg  = completedTrips.length ? tripsTotal / completedTrips.length : 0;
+  const high = completedTrips.length ? Math.max(...completedTrips.map(t => t.amount)) : 0;
+
+  // Trip count label: "4" if no bonuses, "4+" if bonuses exist
+  const tripCountLabel = completedTrips.length + (manuals.length ? '+' : '');
+
+  // ── Summary card ──
   document.getElementById('totalDisplay').textContent = fmt(total);
   document.getElementById('tripCountSub').textContent =
-    `${completed.length} completed trip${completed.length !== 1 ? 's' : ''}`;
+    completedTrips.length + ' completed trip' + (completedTrips.length !== 1 ? 's' : '') +
+    (manuals.length ? ' + ' + manuals.length + ' bonus' + (manuals.length !== 1 ? 'es' : '') : '');
   document.getElementById('goalDisplay').innerHTML =
     `${fmt(total)} / $<span id="goalTarget">${goal}</span>`;
   document.getElementById('goalPct').textContent = Math.round(pct) + '%';
@@ -676,34 +718,69 @@ function updateUI() {
   fill.className = 'progress-fill' + (total >= goal ? ' over' : '');
   document.getElementById('goalInput').value = state.goal;
 
+  // ── Stat cards ──
   document.getElementById('avgTrip').textContent = fmt(avg);
-  document.getElementById('tripCountCard').textContent = completed.length;
+  document.getElementById('tripCountCard').textContent = tripCountLabel;
   document.getElementById('highTrip').textContent = fmt(high);
   document.getElementById('canceledCount').textContent = canceled.length;
 
-  // Trips list
-  const list = document.getElementById('tripList');
+  // ── Trips list: bonuses on top with separator, then real trips ──
+  const list  = document.getElementById('tripList');
   const badge = document.getElementById('tripBadge');
-  badge.textContent = state.trips.length;
+  // Badge shows real trip count only
+  badge.textContent = completedTrips.length + (manuals.length ? '+' : '');
 
   if (state.trips.length === 0) {
     list.innerHTML = `<div class="empty"><div class="empty-icon">📋</div>No trips yet. Add a screenshot to get started.</div>`;
   } else {
-    list.innerHTML = state.trips.map((t, i) => `
-      <div class="trip-item">
-        <div class="trip-left">
-          <div class="trip-name">${escHtml(t.name)}</div>
-          <div class="trip-status ${t.status.toLowerCase()}">${t.status}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:0">
-          ${t.status !== 'Canceled' ? `<div class="trip-amount">${fmt(t.amount)}</div>` : `<div class="trip-amount" style="color:var(--label3)">—</div>`}
-          <button class="trip-delete" onclick="deleteTrip(${i})" title="Remove">×</button>
-        </div>
-      </div>
-    `).join('');
+    let html = '';
+
+    // Bonus entries at top
+    if (manuals.length) {
+      html += `<div class="bonus-section">`;
+      manuals.forEach(t => {
+        const idx = state.trips.indexOf(t);
+        html += `
+        <div class="trip-item bonus-item">
+          <div class="trip-left">
+            <div class="trip-name">${t.icon || '🎁'} ${escHtml(t.name.replace(/ \+\$[\d.]+$/, ''))}</div>
+            <div class="trip-status completed bonus-tag">Bonus added</div>
+          </div>
+          <div style="display:flex;align-items:center;">
+            <div class="trip-amount bonus-amount">+${fmt(t.amount)}</div>
+            <button class="trip-delete" onclick="deleteTrip(${idx})">×</button>
+          </div>
+        </div>`;
+      });
+      html += `</div><div class="bonus-divider"><span>Trips</span></div>`;
+    }
+
+    // Real trips
+    if (realTrips.length === 0) {
+      html += `<div class="empty" style="padding:20px 0 4px;"><div class="empty-icon" style="font-size:28px;">📋</div>No trips yet</div>`;
+    } else {
+      realTrips.forEach(t => {
+        const idx = state.trips.indexOf(t);
+        html += `
+        <div class="trip-item">
+          <div class="trip-left">
+            <div class="trip-name">${escHtml(t.name)}</div>
+            <div class="trip-status ${t.status.toLowerCase()}">${t.status}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0">
+            ${t.status !== 'Canceled'
+              ? `<div class="trip-amount">${fmt(t.amount)}</div>`
+              : `<div class="trip-amount" style="color:var(--label3)">—</div>`}
+            <button class="trip-delete" onclick="deleteTrip(${idx})">×</button>
+          </div>
+        </div>`;
+      });
+    }
+
+    list.innerHTML = html;
   }
 
-  // Manual entries
+  // Manual entries (Add tab)
   renderManualEntries();
 }
 
