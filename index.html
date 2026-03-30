@@ -304,6 +304,95 @@
   }
   .empty-icon { font-size: 40px; margin-bottom: 8px; }
 
+
+  /* CALC TAB */
+  .calc-type-row {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .type-btn {
+    flex: 0 0 auto;
+    padding: 9px 16px; border-radius: 100px;
+    border: 1.5px solid var(--sep);
+    background: var(--bg3); color: var(--label);
+    font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all 0.18s;
+    font-family: inherit;
+  }
+  .type-btn.active {
+    background: var(--accent); border-color: var(--accent);
+    color: white;
+    box-shadow: 0 3px 12px rgba(0,122,255,0.3);
+  }
+  .type-btn:active { transform: scale(0.95); }
+
+  .calc-display {
+    font-size: 52px; font-weight: 700; letter-spacing: -2px;
+    color: var(--accent2); text-align: right;
+    padding: 10px 4px 18px;
+    border-bottom: 0.5px solid var(--sep);
+    margin-bottom: 18px;
+    min-height: 80px;
+    line-height: 1;
+    transition: transform 0.08s;
+  }
+  .calc-display.bump { transform: scale(1.04); }
+
+  .keypad {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .key {
+    aspect-ratio: 1.2;
+    border: none; border-radius: 12px;
+    background: var(--bg3);
+    font-size: 22px; font-weight: 500;
+    color: var(--label);
+    cursor: pointer;
+    transition: all 0.12s;
+    font-family: inherit;
+  }
+  .key:active { transform: scale(0.91); opacity: 0.7; }
+  .key-fn { background: var(--sep); color: var(--label3); font-size: 18px; }
+  .key-dot { font-size: 26px; font-weight: 700; }
+  .key-zero { grid-column: span 1; }
+
+  /* NOTIFICATION BADGE */
+  .earn-notif {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    padding-top: max(54px, calc(44px + env(safe-area-inset-top)));
+    pointer-events: none;
+  }
+  .earn-notif-inner {
+    background: var(--bg2);
+    border: 0.5px solid var(--sep);
+    border-radius: 18px;
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+    max-width: 320px; width: 90%;
+    animation: notifDrop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes notifDrop {
+    from { opacity:0; transform: translateY(-24px) scale(0.92); }
+    to   { opacity:1; transform: none; }
+  }
+  .notif-icon { font-size: 30px; line-height: 1; }
+  .notif-text { flex: 1; }
+  .notif-title { font-size: 14px; font-weight: 700; color: var(--label); }
+  .notif-sub   { font-size: 13px; color: var(--label3); margin-top: 1px; }
+  .notif-amount { font-size: 20px; font-weight: 700; color: var(--accent2); }
+
+  /* manual entry badge */
+  .entry-badge {
+    display: inline-block;
+    font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 100px;
+    background: var(--accent); color: white;
+    margin-left: 6px; vertical-align: middle;
+  }
+
   /* TOAST */
   .toast {
     position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
@@ -364,7 +453,7 @@
   <div class="tabs" style="margin-top:14px;">
     <button class="tab active" onclick="switchTab('summary')">Summary</button>
     <button class="tab" onclick="switchTab('trips')">Trips</button>
-    <button class="tab" onclick="switchTab('shift')">Shift</button>
+    <button class="tab" onclick="switchTab('calc')">Add</button>
   </div>
 </div>
 
@@ -453,41 +542,59 @@
   </button>
 </div>
 
-<!-- SHIFT TAB -->
-<div id="tab-shift" class="page scroll">
+<!-- CALC TAB -->
+<div id="tab-calc" class="page scroll">
+
+  <!-- TYPE SELECTOR -->
   <div class="card">
-    <div class="card-label" style="margin-bottom:20px;">Shift Calculator</div>
-    <div class="shift-grid">
-      <div class="shift-field">
-        <label>Clock In</label>
-        <input class="shift-input" type="time" id="shiftStart">
-      </div>
-      <div class="shift-field">
-        <label>Clock Out</label>
-        <input class="shift-input" type="time" id="shiftEnd">
-      </div>
+    <div class="card-label" style="margin-bottom:20px;">Type</div>
+    <div class="calc-type-row">
+      <button class="type-btn active" data-type="bonus" onclick="selectType(this,'bonus')">🎁 Bonus</button>
+      <button class="type-btn" data-type="doordash" onclick="selectType(this,'doordash')">🚗 DoorDash</button>
+      <button class="type-btn" data-type="ubereats" onclick="selectType(this,'ubereats')">🛵 Uber Eats</button>
+      <button class="type-btn" data-type="instacart" onclick="selectType(this,'instacart')">🛒 Instacart</button>
+      <button class="type-btn" data-type="tip" onclick="selectType(this,'tip')">💸 Tip</button>
+      <button class="type-btn" data-type="other" onclick="selectType(this,'other')">＋ Other</button>
     </div>
-    <div class="shift-result">
-      <div>
-        <div class="shift-result-label">Hourly Rate</div>
-        <div class="shift-result-label" id="shiftDuration" style="margin-top:6px; font-size:13px; opacity:0.7;">— hrs</div>
-      </div>
-      <div class="shift-result-val" id="hourlyRate">$0.00/hr</div>
+    <div id="customLabelWrap" style="display:none; margin-top:14px;">
+      <input class="shift-input" type="text" id="customLabel" placeholder="Label (e.g. Cash tip)" style="width:100%;">
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-label" style="margin-bottom:20px;">Shift History</div>
-    <div id="shiftHistory">
-      <div class="empty">
-        <div class="empty-icon">⏱️</div>
-        No shifts logged yet.
-      </div>
+  <!-- AMOUNT KEYPAD -->
+  <div class="card" style="padding:22px 22px 18px;">
+    <div class="card-label" style="margin-bottom:12px;">Amount</div>
+    <div class="calc-display" id="calcDisplay">$0.00</div>
+    <div class="keypad">
+      <button class="key" onclick="kp('7')">7</button>
+      <button class="key" onclick="kp('8')">8</button>
+      <button class="key" onclick="kp('9')">9</button>
+      <button class="key key-fn" onclick="kp('del')">⌫</button>
+      <button class="key" onclick="kp('4')">4</button>
+      <button class="key" onclick="kp('5')">5</button>
+      <button class="key" onclick="kp('6')">6</button>
+      <button class="key key-fn" onclick="kp('clear')">C</button>
+      <button class="key" onclick="kp('1')">1</button>
+      <button class="key" onclick="kp('2')">2</button>
+      <button class="key" onclick="kp('3')">3</button>
+      <button class="key key-dot" onclick="kp('.')">.</button>
+      <button class="key key-zero" onclick="kp('0')">0</button>
+      <button class="key key-zero" onclick="kp('00')">00</button>
     </div>
-    <button class="upload-btn" onclick="saveShift()" style="margin-top:12px; background:var(--accent2); box-shadow:0 4px 16px rgba(52,199,89,0.3);">
-      Save This Shift
-    </button>
   </div>
+
+  <!-- ADD BUTTON -->
+  <button class="upload-btn" id="calcAddBtn" onclick="calcAdd()" style="background:var(--accent2); box-shadow:0 4px 16px rgba(52,199,89,0.35);">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add to Today's Earnings
+  </button>
+
+  <!-- MANUAL ENTRIES LIST -->
+  <div id="manualEntriesCard" class="card" style="display:none;">
+    <div class="card-label" style="margin-bottom:16px;">Added Today</div>
+    <div class="trip-list" id="manualEntriesList"></div>
+  </div>
+
 </div>
 
 <!-- MANUAL ADD MODAL -->
@@ -543,6 +650,7 @@ function switchTab(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'calc') renderManualEntries();
   event.target.classList.add('active');
 }
 
@@ -595,11 +703,8 @@ function updateUI() {
     `).join('');
   }
 
-  // Shift rate
-  calcShift();
-
-  // Shift history
-  renderShiftHistory();
+  // Manual entries
+  renderManualEntries();
 }
 
 function fmt(n) {
@@ -825,99 +930,10 @@ function showResetConfirm() {
   state.shifts = [];
   saveState();
   updateUI();
-  document.getElementById('shiftStart').value = '';
-  document.getElementById('shiftEnd').value = '';
+  calcRaw = '';
+  const cd = document.getElementById('calcDisplay');
+  if (cd) cd.textContent = '$0.00';
   toast('Reset complete');
-}
-
-// ─── SHIFT CALC ───────────────────────────────────────────
-document.getElementById('shiftStart').addEventListener('change', calcShift);
-document.getElementById('shiftEnd').addEventListener('change', calcShift);
-
-function calcShift() {
-  const start = document.getElementById('shiftStart').value;
-  const end = document.getElementById('shiftEnd').value;
-  const rateEl = document.getElementById('hourlyRate');
-  const durEl = document.getElementById('shiftDuration');
-
-  if (!start || !end) {
-    rateEl.textContent = '$0.00/hr';
-    durEl.textContent = '— hrs';
-    return;
-  }
-
-  const [sh, sm] = start.split(':').map(Number);
-  let [eh, em] = end.split(':').map(Number);
-  let startMins = sh * 60 + sm;
-  let endMins = eh * 60 + em;
-  if (endMins <= startMins) endMins += 24 * 60; // overnight
-  const hours = (endMins - startMins) / 60;
-
-  const completed = state.trips.filter(t => t.status !== 'Canceled');
-  const total = completed.reduce((s, t) => s + t.amount, 0);
-  const rate = hours > 0 ? total / hours : 0;
-
-  rateEl.textContent = fmt(rate) + '/hr';
-  durEl.textContent = hours.toFixed(1) + ' hrs worked';
-}
-
-function saveShift() {
-  const start = document.getElementById('shiftStart').value;
-  const end = document.getElementById('shiftEnd').value;
-  if (!start || !end) { toast('Set start and end time first'); return; }
-
-  const [sh, sm] = start.split(':').map(Number);
-  let [eh, em] = end.split(':').map(Number);
-  let startMins = sh * 60 + sm;
-  let endMins = eh * 60 + em;
-  if (endMins <= startMins) endMins += 24 * 60;
-  const hours = (endMins - startMins) / 60;
-
-  const completed = state.trips.filter(t => t.status !== 'Canceled');
-  const total = completed.reduce((s, t) => s + t.amount, 0);
-  const rate = hours > 0 ? total / hours : 0;
-
-  const now = new Date();
-  state.shifts.unshift({
-    date: now.toLocaleDateString('en-US', { month:'short', day:'numeric' }),
-    start, end,
-    hours: hours.toFixed(1),
-    earnings: total,
-    rate: rate.toFixed(2)
-  });
-  if (state.shifts.length > 20) state.shifts = state.shifts.slice(0, 20);
-  saveState();
-  renderShiftHistory();
-  toast('Shift saved ✓');
-}
-
-function renderShiftHistory() {
-  const el = document.getElementById('shiftHistory');
-  if (!state.shifts.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">⏱️</div>No shifts logged yet.</div>`;
-    return;
-  }
-  el.innerHTML = state.shifts.map((s, i) => `
-    <div class="trip-item">
-      <div class="trip-left">
-        <div class="trip-name">${escHtml(s.date)}</div>
-        <div class="trip-status completed">${escHtml(s.start)} – ${escHtml(s.end)} · ${s.hours}hrs</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:0;">
-        <div style="text-align:right;">
-          <div class="trip-amount">${fmt(parseFloat(s.earnings))}</div>
-          <div style="font-size:11px;color:var(--label3)">$${s.rate}/hr</div>
-        </div>
-        <button class="trip-delete" onclick="deleteShift(${i})" title="Remove">×</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function deleteShift(i) {
-  state.shifts.splice(i, 1);
-  saveState();
-  renderShiftHistory();
 }
 
 // ─── TOAST ────────────────────────────────────────────────
@@ -957,6 +973,132 @@ function initTheme() {
   // No saved pref — follow system, just set the icon correctly
   const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   document.getElementById('themeIcon').innerHTML = sysDark ? SUN_SVG : MOON_SVG;
+}
+
+
+// ─── CALC TAB ─────────────────────────────────────────────
+let calcRaw = '';   // digit string e.g. "2250" = $22.50
+let calcType = 'bonus';
+
+const TYPE_META = {
+  bonus:     { label: 'Bonus',      icon: '🎁', color: '#ff9500' },
+  doordash:  { label: 'DoorDash',   icon: '🚗', color: '#ff3008' },
+  ubereats:  { label: 'Uber Eats',  icon: '🛵', color: '#06c167' },
+  instacart: { label: 'Instacart',  icon: '🛒', color: '#43b02a' },
+  tip:       { label: 'Tip',        icon: '💸', color: '#34c759' },
+  other:     { label: 'Other',      icon: '＋', color: '#007aff' },
+};
+
+function selectType(btn, type) {
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  calcType = type;
+  const wrap = document.getElementById('customLabelWrap');
+  wrap.style.display = type === 'other' ? 'block' : 'none';
+}
+
+function kp(val) {
+  const disp = document.getElementById('calcDisplay');
+  if (val === 'clear') { calcRaw = ''; }
+  else if (val === 'del') { calcRaw = calcRaw.slice(0, -1); }
+  else if (val === '.') {
+    // Treat as cents separator — ignored (we work in integer cents)
+    return;
+  }
+  else {
+    const digits = val === '00' ? '00' : val;
+    if (calcRaw.length >= 7) return; // max $99999.99
+    calcRaw += digits;
+    // Remove leading zeros
+    calcRaw = calcRaw.replace(/^0+/, '') || '';
+  }
+  const cents = parseInt(calcRaw || '0');
+  const dollars = cents / 100;
+  disp.textContent = '$' + dollars.toFixed(2);
+  // Bump animation
+  disp.classList.remove('bump');
+  void disp.offsetWidth;
+  disp.classList.add('bump');
+  setTimeout(() => disp.classList.remove('bump'), 120);
+}
+
+function calcAdd() {
+  const cents = parseInt(calcRaw || '0');
+  if (cents === 0) { toast('Enter an amount first'); return; }
+  const amount = cents / 100;
+
+  const type = calcType;
+  const meta = TYPE_META[type];
+  const customLabel = document.getElementById('customLabel').value.trim();
+  const label = type === 'other' && customLabel ? customLabel : meta.label;
+  const name = label + ' +$' + amount.toFixed(2);
+
+  // Add as a "manual" trip-style entry
+  state.trips.push({ name, amount, status: 'Completed', manual: true, icon: meta.icon, entryType: type });
+  saveState();
+  updateUI();
+  renderManualEntries();
+
+  // Show iOS-style notification on summary
+  showEarnNotif(meta.icon, label, amount);
+
+  // Switch to summary tab to see it
+  setTimeout(() => {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-summary').classList.add('active');
+    document.querySelectorAll('.tab')[0].classList.add('active');
+  }, 400);
+
+  // Reset keypad
+  calcRaw = '';
+  document.getElementById('calcDisplay').textContent = '$0.00';
+  document.getElementById('customLabel').value = '';
+}
+
+function renderManualEntries() {
+  const entries = state.trips.filter(t => t.manual);
+  const card = document.getElementById('manualEntriesCard');
+  const list = document.getElementById('manualEntriesList');
+  if (!entries.length) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  list.innerHTML = entries.map((t, i) => {
+    const realIdx = state.trips.indexOf(t);
+    return `
+    <div class="trip-item">
+      <div class="trip-left">
+        <div class="trip-name">${t.icon || '＋'} ${escHtml(t.name.replace(/ \+\$[\d.]+$/,''))}</div>
+        <div class="trip-status completed">Added manually</div>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <div class="trip-amount">${fmt(t.amount)}</div>
+        <button class="trip-delete" onclick="deleteTrip(${realIdx})">×</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showEarnNotif(icon, label, amount) {
+  // Remove any existing
+  document.querySelectorAll('.earn-notif').forEach(n => n.remove());
+  const el = document.createElement('div');
+  el.className = 'earn-notif';
+  el.innerHTML = `
+    <div class="earn-notif-inner">
+      <div class="notif-icon">${icon}</div>
+      <div class="notif-text">
+        <div class="notif-title">${escHtml(label)} added</div>
+        <div class="notif-sub">Today's earnings updated</div>
+      </div>
+      <div class="notif-amount">+${fmt(amount)}</div>
+    </div>`;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.style.transition = 'opacity 0.4s, transform 0.4s';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(-12px)';
+    setTimeout(() => el.remove(), 400);
+  }, 3000);
 }
 
 // ─── INIT ─────────────────────────────────────────────────
