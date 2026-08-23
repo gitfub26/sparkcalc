@@ -3,72 +3,355 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
-<meta name="theme-color" content="#c9f6e5" />
+<meta name="theme-color" content="#f4f6f8" />
 <title>Trip Ledger</title>
 <style>
-:root{--mint:#c9f6e5;--card:#fff;--ink:#111;--muted:#6d756f;--line:#dfe9e4;--yellow:#ffd928;--danger:#d92d20;--ok:#138a5b;--shadow:0 14px 34px rgba(27,61,48,.10)}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;background:var(--mint);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}body{min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}button,input,select{font:inherit}.app{max-width:560px;margin:auto;min-height:100vh;padding:18px 16px 104px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.brand{font-weight:900;letter-spacing:-.04em;font-size:26px}.datebox{background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.9);padding:9px 12px;border-radius:16px;font-weight:800}.hero{background:#111;border-radius:28px;padding:22px;color:#fff;box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;background:var(--yellow);right:-58px;top:-70px}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;opacity:.68}.earnings{font-size:52px;line-height:1;font-weight:950;letter-spacing:-.06em;margin:8px 0 14px}.goalrow{display:flex;align-items:center;justify-content:space-between;gap:14px}.goaltext{font-weight:800}.progress{height:10px;background:#303030;border-radius:99px;overflow:hidden;margin-top:8px}.progress>i{display:block;height:100%;background:var(--yellow);border-radius:99px;width:0}.pill{padding:9px 12px;border-radius:99px;background:var(--yellow);color:#111;font-weight:900;white-space:nowrap;z-index:1}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.stat{background:#fff;border-radius:20px;padding:15px 12px;box-shadow:var(--shadow)}.stat b{font-size:22px;display:block;letter-spacing:-.04em}.stat span{font-size:11px;color:var(--muted);font-weight:800}.section{margin-top:18px}.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.sectionhead h2{font-size:18px;margin:0}.card{background:#fff;border-radius:24px;padding:16px;box-shadow:var(--shadow)}.empty{text-align:center;color:var(--muted);padding:22px 10px}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 2px;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.row .meta{min-width:0}.row .title{font-weight:900}.row .sub{font-size:12px;color:var(--muted);margin-top:3px}.amount{font-weight:950;font-size:20px}.cancelled{color:var(--muted);font-size:14px}.btn{border:0;border-radius:16px;padding:13px 16px;font-weight:900;background:#111;color:#fff}.btn.yellow{background:var(--yellow);color:#111}.btn.ghost{background:#edf5f1;color:#111}.btn.danger{background:#ffe8e6;color:var(--danger)}.btn.full{width:100%}.actions{display:flex;gap:10px;flex-wrap:wrap}.field{margin-bottom:13px}.field label{display:block;font-size:12px;font-weight:900;color:var(--muted);margin:0 0 6px 3px}.field input,.field select{width:100%;border:1px solid var(--line);background:#f8fbf9;border-radius:15px;padding:13px 14px;outline:none}.field input:focus{border-color:#111}.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(10px,env(safe-area-inset-bottom));width:min(calc(100% - 24px),536px);background:#111;border-radius:22px;padding:7px;display:grid;grid-template-columns:repeat(3,1fr);z-index:20;box-shadow:0 12px 35px rgba(0,0,0,.25)}.nav button{border:0;background:transparent;color:#aaa;border-radius:16px;padding:10px 4px;font-size:11px;font-weight:850}.nav button.active{background:#fff;color:#111}.view{display:none}.view.active{display:block}.importdrop{border:2px dashed #9ccdb9;border-radius:24px;padding:26px 18px;text-align:center;background:rgba(255,255,255,.55)}.importdrop input{display:none}.bigicon{width:54px;height:54px;border-radius:18px;background:#111;color:#fff;display:grid;place-items:center;margin:0 auto 12px;font-size:25px}.notice{font-size:13px;color:var(--muted);line-height:1.45}.status{margin-top:12px;padding:12px;border-radius:14px;background:#edf5f1;font-size:13px;font-weight:800;display:none}.status.show{display:block}.status.bad{background:#ffe8e6;color:#8a1c13}.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);display:none;align-items:flex-end;z-index:50}.modal.show{display:flex}.sheet{background:#fff;width:100%;max-width:560px;margin:auto;border-radius:28px 28px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}.sheethead{display:flex;justify-content:space-between;align-items:center}.sheethead h3{margin:0}.x{border:0;background:#eee;width:36px;height:36px;border-radius:50%;font-weight:900}.editrow{display:grid;grid-template-columns:1.2fr 1fr auto;gap:8px;align-items:end;padding:10px 0;border-bottom:1px solid var(--line)}.editrow input,.editrow select{width:100%;padding:11px;border:1px solid var(--line);border-radius:12px}.trash{border:0;background:#ffe8e6;color:var(--danger);border-radius:12px;padding:12px}.badge{font-size:11px;font-weight:900;padding:5px 8px;border-radius:99px;background:#edf5f1;color:var(--ok)}.badge.warn{background:#fff2cc;color:#805f00}.hidden{display:none!important}.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:92px;background:#111;color:#fff;padding:11px 15px;border-radius:99px;font-size:13px;font-weight:800;opacity:0;pointer-events:none;transition:.2s;z-index:80}.toast.show{opacity:1}.mini{font-size:12px;color:var(--muted)}
-.datebox{color:#111;cursor:pointer}
-.calnavrow{display:flex;justify-content:space-between;align-items:center;margin:2px 0 14px}
-.calnav{border:0;background:#edf5f1;width:34px;height:34px;border-radius:50%;font-weight:900;font-size:16px;color:#111}
-.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.caldow{text-align:center;font-size:11px;font-weight:900;color:var(--muted);padding:4px 0}
-.calday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:0;background:transparent;border-radius:14px;font-weight:800;font-size:14px;color:#c3cdc6;position:relative}
+:root{
+  --bg:#f2f4f7;
+  --card:#ffffff;
+  --card2:#f8fafc;
+  --ink:#14171a;
+  --muted:#6b7280;
+  --border:#e4e8ed;
+  --blue:#2f6fed;
+  --blue-ink:#ffffff;
+  --green:#16a34a;
+  --green-soft:#e6f6ec;
+  --yellow:#f5b400;
+  --yellow-soft:#fff4d6;
+  --red:#dc2626;
+  --red-soft:#fdeaea;
+  --shadow:0 1px 2px rgba(20,26,33,.04),0 6px 20px rgba(20,26,33,.06);
+  --radius-lg:18px;
+  --radius-md:14px;
+  --radius-sm:10px;
+}
+html[data-theme="dark"]{
+  --bg:#0e1013;
+  --card:#191c21;
+  --card2:#20242b;
+  --ink:#eef1f4;
+  --muted:#9aa3ad;
+  --border:#2a2f37;
+  --blue:#5b8def;
+  --blue-ink:#0e1013;
+  --green:#34d399;
+  --green-soft:#12271f;
+  --yellow:#fbbf24;
+  --yellow-soft:#2b230d;
+  --red:#f87171;
+  --red-soft:#2a1616;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 26px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  min-height:100vh;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  transition:background .2s ease,color .2s ease;
+}
+button,input,select{font:inherit;color:inherit}
+.app{max-width:560px;margin:auto;min-height:100vh;padding:14px 14px 100px}
+
+/* header */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 2px 14px}
+.brand{font-weight:800;letter-spacing:-.02em;font-size:19px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.datebox{background:var(--card);border:1px solid var(--border);color:var(--ink);padding:8px 12px;border-radius:99px;font-weight:700;font-size:13px;box-shadow:var(--shadow)}
+.icon-btn{border:1px solid var(--border);background:var(--card);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:15px;box-shadow:var(--shadow)}
+
+/* generic surfaces */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)}
+.section{margin-top:14px}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.sectionhead h2{font-size:14px;margin:0;font-weight:800;letter-spacing:-.01em;color:var(--ink)}
+.notice{font-size:12.5px;color:var(--muted);line-height:1.45;margin:0}
+.mini{font-size:12px;color:var(--muted)}
+
+/* earnings summary */
+.earnings-card{padding:16px}
+.earnings-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:800;color:var(--muted)}
+.earnings{font-size:34px;line-height:1.1;font-weight:800;letter-spacing:-.03em;margin-top:4px}
+.pill{padding:7px 11px;border-radius:99px;background:var(--yellow-soft);color:var(--yellow);font-weight:800;font-size:12.5px;white-space:nowrap;border:1px solid transparent}
+.pill.over{background:var(--green-soft);color:var(--green)}
+.goal-line{margin-top:14px}
+.goalrow-top{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.progress{height:8px;background:var(--border);border-radius:99px;overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--blue);border-radius:99px;width:0;transition:width .25s ease}
+
+/* stats */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:11px 8px;box-shadow:var(--shadow);text-align:center}
+.stat b{font-size:16px;display:block;letter-spacing:-.02em;font-weight:800}
+.stat .stat-label{font-size:9.5px;color:var(--muted);font-weight:800;letter-spacing:.05em;display:block;margin-bottom:4px}
+
+/* lists / rows */
+.list-card{padding:4px 10px}
+.empty{text-align:center;color:var(--muted);padding:26px 10px;font-size:13px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 2px;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:0}
+.row .meta{min-width:0}
+.row .title{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.row .sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.amount{font-weight:800;font-size:15px;white-space:nowrap}
+.amount.cancelled{color:var(--muted);font-weight:700;font-size:13px}
+.badge{font-size:10px;font-weight:800;padding:3px 7px;border-radius:99px;background:var(--card2);color:var(--muted);border:1px solid var(--border)}
+.badge.manual-badge{background:var(--blue);color:var(--blue-ink);border-color:transparent;letter-spacing:.03em}
+.badge.count-badge{background:var(--card2);color:var(--muted)}
+.badge.warn{background:var(--yellow-soft);color:var(--yellow);border-color:transparent}
+
+/* buttons */
+.btn{border:1px solid transparent;border-radius:var(--radius-sm);padding:11px 14px;font-weight:800;font-size:13.5px;background:var(--card2);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--blue);color:var(--blue-ink)}
+.btn.ghost{background:transparent;border-color:var(--border);color:var(--ink)}
+.btn.sm{padding:7px 10px;font-size:12px;border-radius:99px}
+.btn.danger{background:var(--red-soft);color:var(--red)}
+.btn.danger-ghost{background:transparent;border:1px solid var(--red-soft);color:var(--red)}
+.btn.full{width:100%}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* import panel */
+.import-card{display:flex;flex-direction:column;gap:12px}
+.importdrop{border:1.5px dashed var(--border);border-radius:var(--radius-md);padding:16px;display:flex;gap:12px;align-items:center;transition:border-color .15s ease,background .15s ease}
+.importdrop.drag{border-color:var(--blue);background:var(--card2)}
+.importdrop input{display:none}
+.bigicon{flex:none;width:40px;height:40px;border-radius:12px;background:var(--blue);color:var(--blue-ink);display:grid;place-items:center;font-size:18px}
+.import-copy h2{margin:0 0 2px;font-size:14px;font-weight:800}
+.status{padding:10px 12px;border-radius:var(--radius-sm);background:var(--card2);font-size:12.5px;font-weight:700;display:none;color:var(--ink)}
+.status.show{display:block}
+.status.bad{background:var(--red-soft);color:var(--red)}
+
+/* form fields */
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.04em;margin:0 0 6px 2px}
+.field input,.field select{width:100%;border:1px solid var(--border);background:var(--card2);color:var(--ink);border-radius:var(--radius-sm);padding:11px 12px;outline:none}
+.field input:focus,.field select:focus{border-color:var(--blue)}
+
+/* bottom nav */
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(10px,env(safe-area-inset-bottom));width:min(calc(100% - 24px),536px);background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px;display:grid;grid-template-columns:repeat(3,1fr);z-index:20;box-shadow:0 10px 28px rgba(20,26,33,.14)}
+.nav button{border:0;background:transparent;color:var(--muted);border-radius:14px;padding:8px 4px;font-size:10.5px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav button .navicon{font-size:16px;line-height:1}
+.nav button.active{background:var(--card2);color:var(--blue)}
+
+.view{display:none}
+.view.active{display:block}
+
+/* modals */
+.modal{position:fixed;inset:0;background:rgba(10,12,15,.45);backdrop-filter:blur(6px);display:none;align-items:flex-end;z-index:50}
+.modal.show{display:flex}
+.sheet{background:var(--card);width:100%;max-width:560px;margin:auto;border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;border:1px solid var(--border);border-bottom:0}
+.sheethead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.sheethead h3{margin:0;font-size:15px;font-weight:800}
+.x{border:0;background:var(--card2);width:32px;height:32px;border-radius:50%;font-weight:800;color:var(--ink)}
+.editrow{display:grid;grid-template-columns:1.2fr 1fr auto;gap:8px;align-items:end;padding:9px 0;border-bottom:1px solid var(--border)}
+.editrow input,.editrow select{width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card2);color:var(--ink)}
+.trash{border:0;background:var(--red-soft);color:var(--red);border-radius:var(--radius-sm);padding:10px 12px;font-weight:800}
+.hidden{display:none!important}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:88px;background:var(--ink);color:var(--bg);padding:10px 15px;border-radius:99px;font-size:12.5px;font-weight:800;opacity:0;pointer-events:none;transition:.2s;z-index:80}
+.toast.show{opacity:1}
+
+/* calendar */
+.calnavrow{display:flex;justify-content:space-between;align-items:center;margin:4px 0 12px}
+.calnav{border:1px solid var(--border);background:var(--card2);width:32px;height:32px;border-radius:50%;font-weight:800;font-size:15px;color:var(--ink)}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.caldow{text-align:center;font-size:10.5px;font-weight:800;color:var(--muted);padding:4px 0}
+.calday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:0;background:transparent;border-radius:12px;font-weight:700;font-size:13px;color:var(--border);position:relative}
 .calday.pad{visibility:hidden}
-.calday.has{background:#edf5f1;color:#111}
-.calday.has:active{background:#dbeee4}
-.calday.has .dot{position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--ok)}
-.calday.sel{background:#111!important;color:#fff!important}
-.calday.sel .dot{background:var(--yellow)}
-.calday.today:not(.sel){box-shadow:inset 0 0 0 2px var(--ok)}
-.calday:disabled{pointer-events:none;opacity:.55}
+.calday.has{background:var(--card2);color:var(--ink)}
+.calday.has:active{background:var(--border)}
+.calday.has .dot{position:absolute;bottom:5px;width:4px;height:4px;border-radius:50%;background:var(--green)}
+.calday.sel{background:var(--blue)!important;color:var(--blue-ink)!important}
+.calday.sel .dot{background:var(--blue-ink)}
+.calday.today:not(.sel){box-shadow:inset 0 0 0 2px var(--green)}
+.calday:disabled{pointer-events:none;opacity:.45}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="topbar"><div class="brand">Trip Ledger</div><button id="dayPicker" class="datebox" type="button"></button></div>
+  <div class="topbar">
+    <div class="brand">Trip Ledger</div>
+    <div class="topbar-right">
+      <button id="themeToggle" class="icon-btn" type="button" aria-label="Toggle dark mode">◐</button>
+      <button id="dayPicker" class="datebox" type="button"></button>
+    </div>
+  </div>
 
   <main id="home" class="view active">
-    <section class="hero"><div class="eyebrow">Today’s earnings</div><div id="earnings" class="earnings">$0.00</div><div class="goalrow"><div><div id="goalText" class="goaltext">$100.00 goal</div><div class="progress"><i id="goalBar"></i></div></div><div id="goalPill" class="pill">$100 left</div></div></section>
-    <div class="grid"><div class="stat"><b id="avgStat">$0.00</b><span>AVG / PAID TRIP</span></div><div class="stat"><b id="tripStat">0</b><span>TOTAL TRIPS</span></div><div class="stat"><b id="highStat">$0.00</b><span>HIGHEST TRIP</span></div></div>
-    <section class="section"><div class="sectionhead"><h2>Recent activity</h2><button class="btn ghost" data-go="trips">View all</button></div><div id="recentCard" class="card"></div></section>
-    <section class="section card"><div class="actions" style="flex-wrap:nowrap"><label class="btn yellow full" for="screenshots" style="flex:1">Import screenshots</label><button id="resetDayBtn" type="button" class="btn danger" title="Reset this date" aria-label="Reset this date">Reset</button></div><input id="screenshots" class="hidden" type="file" accept="image/*" multiple><div id="importStatus" class="status"></div><p class="notice" style="margin-bottom:0">Choose one or more screenshots from Photos. Processing stays on this device, and duplicate trip numbers are merged automatically.</p></section>
+    <section class="card earnings-card">
+      <div class="earnings-row">
+        <div>
+          <div class="eyebrow">Today's earnings</div>
+          <div id="earnings" class="earnings">$0.00</div>
+        </div>
+        <div id="goalPill" class="pill">$100 left</div>
+      </div>
+      <div class="goal-line">
+        <div class="goalrow-top"><span id="goalText">$100.00 goal</span></div>
+        <div class="progress"><i id="goalBar"></i></div>
+      </div>
+    </section>
+
+    <div class="stat-grid">
+      <div class="stat"><span class="stat-label">AVG / PAID TRIP</span><b id="avgStat">$0.00</b></div>
+      <div class="stat"><span class="stat-label">TOTAL TRIPS</span><b id="tripStat">0</b></div>
+      <div class="stat"><span class="stat-label">HIGHEST TRIP</span><b id="highStat">$0.00</b></div>
+    </div>
+
+    <section class="section">
+      <div class="sectionhead"><h2>Recent activity</h2><button class="btn ghost sm" data-go="trips">View all</button></div>
+      <div id="recentCard" class="card list-card"></div>
+    </section>
+
+    <section class="section card import-card">
+      <div class="importdrop" id="importDrop">
+        <div class="bigicon">⇪</div>
+        <div class="import-copy">
+          <h2>Import screenshots</h2>
+          <p class="notice">Drop screenshots here, or choose from Photos. Everything stays on this device.</p>
+        </div>
+      </div>
+      <div class="actions" style="flex-wrap:nowrap">
+        <label class="btn primary full" for="screenshots" style="flex:1;text-align:center">Choose screenshots</label>
+        <button id="resetDayBtn" type="button" class="btn danger-ghost" title="Reset this date" aria-label="Reset this date">Reset</button>
+      </div>
+      <input id="screenshots" class="hidden" type="file" accept="image/*" multiple>
+      <div id="importStatus" class="status"></div>
+      <p class="notice">Duplicate trip numbers are merged automatically and imported order is never rearranged.</p>
+    </section>
   </main>
 
-  <main id="trips" class="view"><div class="sectionhead"><h2>Trips & additions</h2><span id="tripCountBadge" class="badge">0 entries</span></div><div id="tripList" class="card"></div></main>
+  <main id="trips" class="view">
+    <div class="sectionhead"><h2>Trips &amp; additions</h2><span id="tripCountBadge" class="badge count-badge">0 entries</span></div>
+    <div id="tripList" class="card list-card"></div>
+  </main>
 
-
-  <main id="manual" class="view"><div class="card"><h2 style="margin-top:0">Add extra earnings</h2><div class="field"><label>DATE</label><input id="manualDate" type="date"></div><div class="field"><label>AMOUNT</label><input id="manualAmount" inputmode="decimal" placeholder="0.00"></div><div class="field"><label>LABEL / SOURCE</label><input id="manualLabel" placeholder="Cash tip, DoorDash, bonus…"></div><button id="manualSave" class="btn yellow full">Add earnings</button></div><div class="section card"><h2 style="margin-top:0">Settings & backup</h2><div class="field"><label>GLOBAL DAILY GOAL</label><input id="goalInput" inputmode="decimal"></div><div class="actions"><button id="saveGoal" class="btn">Save goal</button><button id="exportBtn" class="btn ghost">Export backup</button><label class="btn ghost" for="restoreInput">Restore backup</label><input id="restoreInput" class="hidden" type="file" accept="application/json"></div><p class="notice">Backups contain only structured trip data and settings. Screenshot images are never stored.</p></div></main>
+  <main id="manual" class="view">
+    <div class="card">
+      <h2 style="margin-top:0;font-size:14px;font-weight:800">Add extra earnings</h2>
+      <div class="field"><label>DATE</label><input id="manualDate" type="date"></div>
+      <div class="field"><label>AMOUNT</label><input id="manualAmount" inputmode="decimal" placeholder="0.00"></div>
+      <div class="field"><label>LABEL / SOURCE</label><input id="manualLabel" placeholder="Cash tip, DoorDash, bonus…"></div>
+      <button id="manualSave" class="btn primary full">Add earnings</button>
+    </div>
+    <div class="section card">
+      <h2 style="margin-top:0;font-size:14px;font-weight:800">Settings &amp; backup</h2>
+      <div class="field"><label>GLOBAL DAILY GOAL</label><input id="goalInput" inputmode="decimal"></div>
+      <div class="actions">
+        <button id="saveGoal" class="btn primary">Save goal</button>
+        <button id="exportBtn" class="btn ghost">Export backup</button>
+        <label class="btn ghost" for="restoreInput">Restore backup</label>
+        <input id="restoreInput" class="hidden" type="file" accept="application/json">
+      </div>
+      <p class="notice">Backups contain only structured trip data and settings. Screenshot images are never stored.</p>
+    </div>
+  </main>
 </div>
 
-<nav class="nav"><button class="active" data-view="home">Home</button><button data-view="trips">Trips</button><button data-view="manual">Manual</button></nav>
-<div id="reviewModal" class="modal"><div class="sheet"><div class="sheethead"><h3>Review flagged import</h3><button class="x" id="closeReview">×</button></div><p class="notice">Some text was uncertain. Correct the date, trip numbers, and amounts, then save.</p><div class="field"><label>DETECTED DATE</label><input id="reviewDate" type="date"></div><div id="reviewRows"></div><div class="actions" style="margin-top:14px"><button id="addReviewRow" class="btn ghost">Add row</button><button id="saveReview" class="btn yellow">Save import</button></div></div></div>
-<div id="editModal" class="modal"><div class="sheet"><div class="sheethead"><h3>Edit entry</h3><button class="x" id="closeEdit">×</button></div><div id="editBody"></div></div></div>
-<div id="calendarModal" class="modal"><div class="sheet"><div class="sheethead"><h3 id="calMonthLabel">Month</h3><button class="x" id="closeCal">×</button></div><div class="calnavrow"><button type="button" class="calnav" id="calPrev">‹</button><span class="mini">Only days with saved data can be opened</span><button type="button" class="calnav" id="calNext">›</button></div><div class="calgrid" id="calGrid"></div></div></div>
+<nav class="nav">
+  <button class="active" data-view="home"><span class="navicon">⌂</span>Home</button>
+  <button data-view="trips"><span class="navicon">≡</span>Trips</button>
+  <button data-view="manual"><span class="navicon">+</span>Manual</button>
+</nav>
+
+<div id="reviewModal" class="modal"><div class="sheet">
+  <div class="sheethead"><h3>Review flagged import</h3><button class="x" id="closeReview">×</button></div>
+  <p class="notice">Some text was uncertain. Correct the date, trip numbers, and amounts, then save.</p>
+  <div class="field"><label>DETECTED DATE</label><input id="reviewDate" type="date"></div>
+  <div id="reviewRows"></div>
+  <div class="actions" style="margin-top:14px"><button id="addReviewRow" class="btn ghost">Add row</button><button id="saveReview" class="btn primary">Save import</button></div>
+</div></div>
+
+<div id="editModal" class="modal"><div class="sheet">
+  <div class="sheethead"><h3>Edit entry</h3><button class="x" id="closeEdit">×</button></div>
+  <div id="editBody"></div>
+</div></div>
+
+<div id="calendarModal" class="modal"><div class="sheet">
+  <div class="sheethead"><h3 id="calMonthLabel">Month</h3><button class="x" id="closeCal">×</button></div>
+  <div class="calnavrow"><button type="button" class="calnav" id="calPrev">‹</button><span class="mini">Only days with saved data can be opened</span><button type="button" class="calnav" id="calNext">›</button></div>
+  <div class="calgrid" id="calGrid"></div>
+</div></div>
+
 <div id="toast" class="toast"></div>
 <canvas id="workCanvas" class="hidden"></canvas>
 <script>
 'use strict';
 const DBKEY='tripLedger.v1';
-const state={data:{goal:100,trips:{},manual:[]},date:localISO(new Date()),review:null,editing:null};
+const THEMEKEY='tripLedger.theme';
+const state={data:{goal:100,trips:{},manual:[],nextOrder:1},date:localISO(new Date()),review:null,editing:null};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function localISO(d){const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)}
 function money(n){return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(n)||0)}
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)}
-function load(){try{const x=JSON.parse(localStorage.getItem(DBKEY));if(x&&x.trips&&Array.isArray(x.manual))state.data=x}catch(e){} $('#goalInput').value=state.data.goal;}
+
+/* ---------- theme ---------- */
+function initTheme(){const saved=localStorage.getItem(THEMEKEY);const theme=saved==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',theme);updateThemeIcon(theme)}
+function updateThemeIcon(theme){$('#themeToggle').textContent=theme==='dark'?'☀':'◐'}
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light';const next=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',next);localStorage.setItem(THEMEKEY,next);updateThemeIcon(next)}
+$('#themeToggle').onclick=toggleTheme;
+
+/* ---------- stable screenshot-import ordering ----------
+   Every screenshot-imported trip gets a permanent, ever-increasing `order`
+   value the first time it's imported. Trips are always displayed sorted by
+   that value, so re-imports, edits, reloads, and reopening the app never
+   rearrange the list. Manual entries are appended after trips for the same
+   date, sorted by when they were created. */
+function migrateOrder(){
+  const trips=Object.values(state.data.trips);
+  let maxOrder=0;
+  trips.forEach(t=>{if(typeof t.order==='number'&&t.order>maxOrder)maxOrder=t.order});
+  const missing=trips.filter(t=>typeof t.order!=='number');
+  if(missing.length){
+    missing.sort((a,b)=>(a.updated||a.created||0)-(b.updated||b.created||0));
+    missing.forEach(t=>{maxOrder+=1;t.order=maxOrder});
+  }
+  if(typeof state.data.nextOrder!=='number'||state.data.nextOrder<=maxOrder)state.data.nextOrder=maxOrder+1;
+}
+function nextOrderVal(){if(typeof state.data.nextOrder!=='number')state.data.nextOrder=1;return state.data.nextOrder++}
+function orderedEntries(date){
+  const trips=Object.values(state.data.trips).filter(x=>x.date===date).sort((a,b)=>(a.order??0)-(b.order??0));
+  const manual=state.data.manual.filter(x=>x.date===date).sort((a,b)=>(a.created||0)-(b.created||0));
+  return trips.map(x=>({...x,kind:'trip'})).concat(manual.map(x=>({...x,kind:'manual'})));
+}
+
+function load(){
+  try{const x=JSON.parse(localStorage.getItem(DBKEY));if(x&&x.trips&&Array.isArray(x.manual))state.data=x}catch(e){}
+  if(typeof state.data.goal!=='number')state.data.goal=Number(state.data.goal)||100;
+  migrateOrder();
+  persist();
+  $('#goalInput').value=state.data.goal;
+}
 function persist(){localStorage.setItem(DBKEY,JSON.stringify(state.data))}
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
 function entriesFor(date){const trips=Object.values(state.data.trips).filter(x=>x.date===date);const manual=state.data.manual.filter(x=>x.date===date);return{trips,manual}}
 function stats(date){const {trips,manual}=entriesFor(date);const paid=trips.filter(t=>!t.cancelled);const tripTotal=paid.reduce((s,t)=>s+t.amount,0);const manualTotal=manual.reduce((s,m)=>s+m.amount,0);return{earnings:tripTotal+manualTotal,totalTrips:trips.length,avg:paid.length?tripTotal/paid.length:0,high:paid.length?Math.max(...paid.map(t=>t.amount)):0,trips,manual}}
-function render(){const s=stats(state.date),g=Number(state.data.goal)||100;$('#earnings').textContent=money(s.earnings);$('#avgStat').textContent=money(s.avg);$('#tripStat').textContent=s.totalTrips;$('#highStat').textContent=money(s.high);$('#goalText').textContent=`${money(g)} goal`;$('#goalBar').style.width=Math.min(100,s.earnings/g*100)+'%';const diff=s.earnings-g;$('#goalPill').textContent=diff>=0?`${money(diff)} over`:`${money(-diff)} left`;$('#goalPill').style.background=diff>=0?'#b9f6d6':'var(--yellow)';
- const all=[...s.trips.map(x=>({...x,kind:'trip'})),...s.manual.map(x=>({...x,kind:'manual'}))].sort((a,b)=>(b.updated||b.created||0)-(a.updated||a.created||0));
- $('#recentCard').innerHTML=all.length?all.slice(0,4).map(rowHTML).join(''):'<div class="empty">No earnings saved for this date.</div>';
- $('#tripList').innerHTML=all.length?all.map(rowHTML).join(''):'<div class="empty">No trips or manual additions for this date.</div>';$('#tripCountBadge').textContent=`${all.length} ${all.length===1?'entry':'entries'}`;$$('[data-entry]').forEach(b=>b.onclick=()=>openEdit(b.dataset.kind,b.dataset.entry));}
-function rowHTML(x){if(x.kind==='manual')return `<div class="row" data-entry="${x.id}" data-kind="manual"><div class="meta"><div class="title">${esc(x.label||'Manual addition')}</div><div class="sub">Manual earnings</div></div><div class="amount">${money(x.amount)}</div></div>`;return `<div class="row" data-entry="${esc(x.tripNo)}" data-kind="trip"><div class="meta"><div class="title">Trip #${esc(x.tripNo)}</div><div class="sub">${x.cancelled?'Cancelled':'Completed trip'}</div></div><div class="amount ${x.cancelled?'cancelled':''}">${x.cancelled?'Cancelled':money(x.amount)}</div></div>`}
+function render(){
+  const s=stats(state.date),g=Number(state.data.goal)||100;
+  $('#earnings').textContent=money(s.earnings);
+  $('#avgStat').textContent=money(s.avg);
+  $('#tripStat').textContent=s.totalTrips;
+  $('#highStat').textContent=money(s.high);
+  $('#goalText').textContent=`${money(g)} goal`;
+  $('#goalBar').style.width=Math.min(100,s.earnings/g*100)+'%';
+  const diff=s.earnings-g;
+  $('#goalPill').textContent=diff>=0?`${money(diff)} over`:`${money(-diff)} left`;
+  $('#goalPill').classList.toggle('over',diff>=0);
+  const all=orderedEntries(state.date);
+  $('#recentCard').innerHTML=all.length?all.slice(-4).reverse().map(rowHTML).join(''):'<div class="empty">No earnings saved for this date.</div>';
+  $('#tripList').innerHTML=all.length?all.map(rowHTML).join(''):'<div class="empty">No trips or manual additions for this date.</div>';
+  $('#tripCountBadge').textContent=`${all.length} ${all.length===1?'entry':'entries'}`;
+  $$('[data-entry]').forEach(b=>b.onclick=()=>openEdit(b.dataset.kind,b.dataset.entry));
+}
+function rowHTML(x){
+  if(x.kind==='manual')return `<div class="row" data-entry="${x.id}" data-kind="manual"><div class="meta"><div class="title">${esc(x.label||'Manual addition')} <span class="badge manual-badge">MANUAL</span></div><div class="sub">Manual earnings</div></div><div class="amount">${money(x.amount)}</div></div>`;
+  return `<div class="row" data-entry="${esc(x.tripNo)}" data-kind="trip"><div class="meta"><div class="title">Trip #${esc(x.tripNo)}</div><div class="sub">${x.cancelled?'Cancelled':'Completed trip'}</div></div><div class="amount ${x.cancelled?'cancelled':''}">${x.cancelled?'Cancelled':money(x.amount)}</div></div>`;
+}
 function fmtDateLabel(iso){const d=new Date(iso+'T00:00:00');return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
 function setDate(d){state.date=d;$('#dayPicker').textContent=fmtDateLabel(d);$('#manualDate').value=d;render()}
-// Only dates that actually have a trip or manual entry are selectable in the calendar.
 function datesWithData(){const s=new Set();Object.values(state.data.trips).forEach(t=>t.date&&s.add(t.date));state.data.manual.forEach(m=>m.date&&s.add(m.date));return s}
 let calView={y:0,m:0};
 function openCalendar(){const d=new Date(state.date+'T00:00:00');calView={y:d.getFullYear(),m:d.getMonth()};renderCalendar();$('#calendarModal').classList.add('show')}
@@ -76,17 +359,33 @@ function renderCalendar(){const avail=datesWithData();const{y,m}=calView;const f
 $('#calPrev').onclick=()=>{calView.m--;if(calView.m<0){calView.m=11;calView.y--}renderCalendar()};
 $('#calNext').onclick=()=>{calView.m++;if(calView.m>11){calView.m=0;calView.y++}renderCalendar()};
 $('#closeCal').onclick=()=>$('#calendarModal').classList.remove('show');
-// Clears trips + manual entries for the currently viewed date only (after confirmation).
 function resetDay(){const d=state.date;const{trips,manual}=entriesFor(d);const n=trips.length+manual.length;if(!n){toast('Nothing to reset for this date');return}if(!confirm(`Delete all ${n} ${n===1?'entry':'entries'} for ${fmtDateLabel(d)}? This can't be undone.`))return;Object.keys(state.data.trips).forEach(k=>{if(state.data.trips[k].date===d)delete state.data.trips[k]});state.data.manual=state.data.manual.filter(m=>m.date!==d);persist();render();toast('Day reset')}
 $$('.nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));$$('[data-go]').forEach(b=>b.onclick=()=>showView(b.dataset.go));function showView(v){$$('.view').forEach(x=>x.classList.toggle('active',x.id===v));$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.view===v))}
 $('#dayPicker').onclick=openCalendar;$('#resetDayBtn').onclick=resetDay;$('#manualSave').onclick=()=>{const a=Number(String($('#manualAmount').value).replace(/[^0-9.-]/g,''));if(!a||a<0)return toast('Enter a valid amount');state.data.manual.push({id:uid(),date:$('#manualDate').value||state.date,amount:a,label:$('#manualLabel').value.trim()||'Manual addition',created:Date.now()});persist();$('#manualAmount').value='';$('#manualLabel').value='';render();toast('Earnings added')};
 $('#saveGoal').onclick=()=>{const g=Number($('#goalInput').value);if(!(g>0))return toast('Enter a valid goal');state.data.goal=g;persist();render();toast('Goal saved')};
 $('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({app:'Trip Ledger',version:1,exportedAt:new Date().toISOString(),data:state.data},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`trip-ledger-backup-${localISO(new Date())}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
-$('#restoreInput').onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());const d=j.data||j;if(!d.trips||!Array.isArray(d.manual))throw 0;state.data={goal:Number(d.goal)||100,trips:d.trips,manual:d.manual};persist();$('#goalInput').value=state.data.goal;render();toast('Backup restored')}catch{toast('Invalid backup file')}e.target.value=''};
-function openEdit(kind,id){state.editing={kind,id};const body=$('#editBody');if(kind==='trip'){const x=state.data.trips[id];body.innerHTML=`<div class="field"><label>DATE</label><input id="eDate" type="date" value="${x.date}"></div><div class="field"><label>TRIP NUMBER</label><input id="eTrip" value="${esc(x.tripNo)}"></div><div class="field"><label>STATUS</label><select id="eStatus"><option value="paid" ${!x.cancelled?'selected':''}>Paid</option><option value="cancelled" ${x.cancelled?'selected':''}>Cancelled</option></select></div><div class="field"><label>AMOUNT</label><input id="eAmount" inputmode="decimal" value="${x.amount}"></div><div class="actions"><button id="eSave" class="btn yellow">Save</button><button id="eDelete" class="btn danger">Delete</button></div>`}else{const x=state.data.manual.find(m=>m.id===id);body.innerHTML=`<div class="field"><label>DATE</label><input id="eDate" type="date" value="${x.date}"></div><div class="field"><label>LABEL</label><input id="eLabel" value="${esc(x.label)}"></div><div class="field"><label>AMOUNT</label><input id="eAmount" inputmode="decimal" value="${x.amount}"></div><div class="actions"><button id="eSave" class="btn yellow">Save</button><button id="eDelete" class="btn danger">Delete</button></div>`}$('#editModal').classList.add('show');$('#eSave').onclick=saveEdit;$('#eDelete').onclick=deleteEdit}
+$('#restoreInput').onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());const d=j.data||j;if(!d.trips||!Array.isArray(d.manual))throw 0;state.data={goal:Number(d.goal)||100,trips:d.trips,manual:d.manual,nextOrder:typeof d.nextOrder==='number'?d.nextOrder:undefined};migrateOrder();persist();$('#goalInput').value=state.data.goal;render();toast('Backup restored')}catch{toast('Invalid backup file')}e.target.value=''};
+function openEdit(kind,id){state.editing={kind,id};const body=$('#editBody');if(kind==='trip'){const x=state.data.trips[id];body.innerHTML=`<div class="field"><label>DATE</label><input id="eDate" type="date" value="${x.date}"></div><div class="field"><label>TRIP NUMBER</label><input id="eTrip" value="${esc(x.tripNo)}"></div><div class="field"><label>STATUS</label><select id="eStatus"><option value="paid" ${!x.cancelled?'selected':''}>Paid</option><option value="cancelled" ${x.cancelled?'selected':''}>Cancelled</option></select></div><div class="field"><label>AMOUNT</label><input id="eAmount" inputmode="decimal" value="${x.amount}"></div><div class="actions"><button id="eSave" class="btn primary">Save</button><button id="eDelete" class="btn danger">Delete</button></div>`}else{const x=state.data.manual.find(m=>m.id===id);body.innerHTML=`<div class="field"><label>DATE</label><input id="eDate" type="date" value="${x.date}"></div><div class="field"><label>LABEL</label><input id="eLabel" value="${esc(x.label)}"></div><div class="field"><label>AMOUNT</label><input id="eAmount" inputmode="decimal" value="${x.amount}"></div><div class="actions"><button id="eSave" class="btn primary">Save</button><button id="eDelete" class="btn danger">Delete</button></div>`}$('#editModal').classList.add('show');$('#eSave').onclick=saveEdit;$('#eDelete').onclick=deleteEdit}
 function saveEdit(){const {kind,id}=state.editing;if(kind==='trip'){const old=state.data.trips[id],newId=$('#eTrip').value.trim();if(!newId)return toast('Trip number required');if(newId!==id)delete state.data.trips[id];state.data.trips[newId]={...old,tripNo:newId,date:$('#eDate').value,cancelled:$('#eStatus').value==='cancelled',amount:$('#eStatus').value==='cancelled'?0:Number($('#eAmount').value)||0,updated:Date.now()}}else{const x=state.data.manual.find(m=>m.id===id);Object.assign(x,{date:$('#eDate').value,label:$('#eLabel').value.trim()||'Manual addition',amount:Number($('#eAmount').value)||0,updated:Date.now()})}persist();$('#editModal').classList.remove('show');render();toast('Entry updated')}
 function deleteEdit(){const {kind,id}=state.editing;if(kind==='trip')delete state.data.trips[id];else state.data.manual=state.data.manual.filter(m=>m.id!==id);persist();$('#editModal').classList.remove('show');render();toast('Entry deleted')}
 $('#closeEdit').onclick=()=>$('#editModal').classList.remove('show');$('#closeReview').onclick=()=>$('#reviewModal').classList.remove('show');
+
+/* ---------- drag & drop into the import screenshots input ---------- */
+(function(){
+  const dz=$('#importDrop'),input=$('#screenshots');
+  ['dragover','dragenter'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag')}));
+  ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag')}));
+  dz.addEventListener('drop',e=>{
+    const files=e.dataTransfer&&e.dataTransfer.files;
+    if(!files||!files.length)return;
+    try{
+      const dt=new DataTransfer();
+      [...files].forEach(f=>dt.items.add(f));
+      input.files=dt.files;
+      input.dispatchEvent(new Event('change'));
+    }catch(err){/* DataTransfer construction unsupported in this browser */}
+  });
+})();
 
 // Screenshot recognition via Tesseract.js (bundled OCR engine, loaded once from CDN).
 // Works on every browser including iOS Safari, unlike the browser-native TextDetector.
@@ -103,11 +402,14 @@ async function recognizeScreenshot(file){await loadTesseract();const processed=a
 // pairs each "Trip #NNNN" with the nearest amount/status. No coordinates required.
 function parseTripsFromText(raw){const lines=raw.split('\n').map(l=>l.trim()).filter(Boolean);const seen=new Set();const trips=[];for(let i=0;i<lines.length;i++){const line=lines[i];const tripMatch=line.match(/#(\d{3,6})/);if(!tripMatch)continue;const name='Trip #'+tripMatch[1];if(seen.has(name))continue;seen.add(name);let amount=0;const estSame=line.match(/[Ee]stimate\s*\$?\s*(\d+\.\d{2})/);if(estSame){amount=parseFloat(estSame[1])}else{const nums=[...line.matchAll(/\b(\d{1,3}\.\d{2})\b/g)].map(m=>parseFloat(m[1])).filter(n=>n>=1&&n<500);if(nums.length)amount=Math.max(...nums)}let status='Completed';for(let j=i+1;j<=Math.min(lines.length-1,i+3);j++){if(/cancel/i.test(lines[j])){status='Canceled';amount=0;break}if(/complet|delivered/i.test(lines[j])){status='Completed';break}}trips.push({name,amount,status})}if(trips.length===0){lines.forEach((line,i)=>{const est=line.match(/[Ee]stimate\s*\$?\s*(\d+\.\d{2})/);if(!est)return;const amount=parseFloat(est[1]);const ctx=lines.slice(Math.max(0,i-3),Math.min(lines.length,i+4)).join(' ');const nm=ctx.match(/#(\d{3,6})/);const name=nm?'Trip #'+nm[1]:'Trip '+(trips.length+1);if(trips.find(t=>t.name===name))return;const status=/cancel/i.test(ctx)?'Canceled':'Completed';trips.push({name,amount,status})})}return trips}
 function parseDate(text){const months={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,sept:8,oct:9,nov:10,dec:11};const m=text.match(/(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)?\s*,?\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s*(\d{4}))?/i);if(!m)return null;const now=new Date(),mon=months[m[1].toLowerCase()],day=+m[2];let y=m[3]?+m[3]:now.getFullYear();let d=new Date(y,mon,day);if(!m[3]&&d>now)d=new Date(y-1,mon,day);return localISO(d)}
-function saveImported(date,rows){for(const r of rows){if(!r.tripNo)continue;state.data.trips[r.tripNo]={tripNo:String(r.tripNo),date,amount:r.cancelled?0:Number(r.amount)||0,cancelled:!!r.cancelled,updated:Date.now()}}persist();setDate(date);render()}
+// Assigns a permanent, ever-increasing order value the first time a trip is imported.
+// Re-imports of the same trip number keep their original order unless the date changed,
+// in which case they're treated as moved and appended to the end of the global sequence.
+function saveImported(date,rows){for(const r of rows){if(!r.tripNo)continue;const key=String(r.tripNo);const existing=state.data.trips[key];let order;if(existing&&typeof existing.order==='number'){order=(existing.date===date)?existing.order:nextOrderVal()}else{order=nextOrderVal()}state.data.trips[key]={tripNo:key,date,amount:r.cancelled?0:Number(r.amount)||0,cancelled:!!r.cancelled,order,created:existing&&existing.created||Date.now(),updated:Date.now()}}persist();setDate(date);render()}
 function openReview(result){state.review=result;$('#reviewDate').value=result.date||state.date;renderReviewRows();$('#reviewModal').classList.add('show');showStatus(result.reason||'Import needs attention.',true)}
 function renderReviewRows(){const box=$('#reviewRows');box.innerHTML=(state.review.rows||[]).map((r,i)=>`<div class="editrow"><div><label class="mini">Trip number</label><input data-r="tripNo" data-i="${i}" value="${esc(r.tripNo)}"></div><div><label class="mini">Amount / status</label><input data-r="amount" data-i="${i}" value="${r.cancelled?'Cancelled':r.amount}"></div><button class="trash" data-del="${i}">×</button></div>`).join('')||'<div class="empty">No rows were recognized. Add each trip manually below.</div>';$$('[data-r]').forEach(x=>x.oninput=()=>{const r=state.review.rows[+x.dataset.i];if(x.dataset.r==='tripNo')r.tripNo=x.value;else{r.cancelled=/cancel/i.test(x.value);r.amount=r.cancelled?0:Number(x.value.replace(/[^0-9.]/g,''))||0}});$$('[data-del]').forEach(x=>x.onclick=()=>{state.review.rows.splice(+x.dataset.del,1);renderReviewRows()})}
 $('#addReviewRow').onclick=()=>{state.review.rows.push({tripNo:'',amount:0,cancelled:false});renderReviewRows();setTimeout(()=>$$('[data-r="tripNo"]').at(-1)?.focus(),30)};$('#saveReview').onclick=()=>{const date=$('#reviewDate').value;const rows=state.review.rows.filter(r=>String(r.tripNo).trim()).map(r=>({...r,tripNo:String(r.tripNo).trim()}));if(!date||!rows.length)return toast('Add a date and at least one trip');saveImported(date,rows);$('#reviewModal').classList.remove('show');toast(`${rows.length} trips saved`)};
-load();setDate(state.date);
+initTheme();load();setDate(state.date);
 </script>
 </body>
 </html>
