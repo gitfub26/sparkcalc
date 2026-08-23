@@ -114,12 +114,8 @@ button,input,select{font:inherit;color:inherit}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 
 /* import panel */
-.import-card{display:flex;flex-direction:column;gap:12px}
-.importdrop{border:1.5px dashed var(--border);border-radius:var(--radius-md);padding:16px;display:flex;gap:12px;align-items:center;transition:border-color .15s ease,background .15s ease}
-.importdrop.drag{border-color:var(--blue);background:var(--card2)}
-.importdrop input{display:none}
-.bigicon{flex:none;width:40px;height:40px;border-radius:12px;background:var(--blue);color:var(--blue-ink);display:grid;place-items:center;font-size:18px}
-.import-copy h2{margin:0 0 2px;font-size:14px;font-weight:800}
+.import-card{display:flex;flex-direction:column;gap:12px;transition:box-shadow .15s ease,border-color .15s ease}
+.import-card.drag{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue) inset}
 .status{padding:10px 12px;border-radius:var(--radius-sm);background:var(--card2);font-size:12.5px;font-weight:700;display:none;color:var(--ink)}
 .status.show{display:block}
 .status.bad{background:var(--red-soft);color:var(--red)}
@@ -205,21 +201,13 @@ button,input,select{font:inherit;color:inherit}
       <div id="recentCard" class="card list-card"></div>
     </section>
 
-    <section class="section card import-card">
-      <div class="importdrop" id="importDrop">
-        <div class="bigicon">⇪</div>
-        <div class="import-copy">
-          <h2>Import screenshots</h2>
-          <p class="notice">Drop screenshots here, or choose from Photos. Everything stays on this device.</p>
-        </div>
-      </div>
+    <section class="section card import-card" id="importDrop">
       <div class="actions" style="flex-wrap:nowrap">
         <label class="btn primary full" for="screenshots" style="flex:1;text-align:center">Choose screenshots</label>
         <button id="resetDayBtn" type="button" class="btn danger-ghost" title="Reset this date" aria-label="Reset this date">Reset</button>
       </div>
       <input id="screenshots" class="hidden" type="file" accept="image/*" multiple>
       <div id="importStatus" class="status"></div>
-      <p class="notice">Duplicate trip numbers are merged automatically and imported order is never rearranged.</p>
     </section>
   </main>
 
