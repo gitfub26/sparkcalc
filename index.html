@@ -405,7 +405,33 @@ function resetDay(){const d=state.date;const{trips,manual}=entriesFor(d);const n
 $$('.nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));$$('[data-go]').forEach(b=>b.onclick=()=>showView(b.dataset.go));function showView(v){$$('.view').forEach(x=>x.classList.toggle('active',x.id===v));$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.view===v))}
 $('#dayPicker').onclick=openCalendar;$('#resetDayBtn').onclick=resetDay;$('#manualSave').onclick=()=>{const a=Number(String($('#manualAmount').value).replace(/[^0-9.-]/g,''));if(!a||a<0)return toast('Enter a valid amount');state.data.manual.push({id:uid(),date:$('#manualDate').value||state.date,amount:a,label:$('#manualLabel').value.trim()||'Manual addition',created:Date.now()});persist();$('#manualAmount').value='';$('#manualLabel').value='';render();toast('Earnings added')};
 $('#saveGoal').onclick=()=>{const g=Number($('#goalInput').value);if(!(g>0))return toast('Enter a valid goal');state.data.goal=g;persist();render();toast('Goal saved')};
-$('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({app:'Trip Ledger',version:1,exportedAt:new Date().toISOString(),data:state.data},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`trip-ledger-backup-${localISO(new Date())}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+async function exportBackup(){
+  const name=`trip-ledger-backup-${localISO(new Date())}.json`;
+  const contents=JSON.stringify({app:'Trip Ledger',version:1,exportedAt:new Date().toISOString(),data:state.data},null,2);
+  const file=new File([contents],name,{type:'application/json'});
+  try{
+    if(window.showSaveFilePicker){
+      const handle=await window.showSaveFilePicker({suggestedName:name,types:[{description:'JSON backup',accept:{'application/json':['.json']}}]});
+      const writable=await handle.createWritable();
+      await writable.write(file);
+      await writable.close();
+      toast('Backup saved');
+      return;
+    }
+    if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){
+      await navigator.share({title:'Trip Ledger backup',files:[file]});
+      toast('Backup exported');
+      return;
+    }
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(file);
+    a.download=name;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    toast('Backup downloaded');
+  }catch(err){if(err&&err.name!=='AbortError')toast('Could not export backup')}
+}
+$('#exportBtn').onclick=exportBackup;
 $('#restoreInput').onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());const d=j.data||j;if(!d.trips||!Array.isArray(d.manual))throw 0;state.data={goal:Number(d.goal)||100,trips:d.trips,manual:d.manual,nextOrder:typeof d.nextOrder==='number'?d.nextOrder:undefined};migrateOrder();persist();$('#goalInput').value=state.data.goal;render();toast('Backup restored')}catch{toast('Invalid backup file')}e.target.value=''};
 function openEdit(kind,id){state.editing={kind,id};const body=$('#editBody');if(kind==='trip'){const x=state.data.trips[id];body.innerHTML=`<div class="field"><label>DATE</label><input id="eDate" type="date" value="${x.date}"></div><div class="field"><label>TRIP NUMBER</label><input id="eTrip" value="${esc(x.tripNo)}"></div><div class="field"><label>STATUS</label><select id="eStatus"><option value="paid" ${!x.cancelled?'selected':''}>Paid</option><option value="cancelled" ${x.cancelled?'selected':''}>Cancelled</option></select></div><div class="field"><label>AMOUNT</label><input id="eAmount" inputmode="decimal" value="${x.amount}"></div><div class="actions"><button id="eSave" class="btn primary">Save</button><button id="eDelete" class="btn danger">Delete</button></div>`}else{const x=state.data.manual.find(m=>m.id===id);body.innerHTML=`<div class="field"><label>DATE</label><input id="eDate" type="date" value="${x.date}"></div><div class="field"><label>LABEL</label><input id="eLabel" value="${esc(x.label)}"></div><div class="field"><label>AMOUNT</label><input id="eAmount" inputmode="decimal" value="${x.amount}"></div><div class="actions"><button id="eSave" class="btn primary">Save</button><button id="eDelete" class="btn danger">Delete</button></div>`}$('#editModal').classList.add('show');$('#eSave').onclick=saveEdit;$('#eDelete').onclick=deleteEdit}
 function saveEdit(){const {kind,id}=state.editing;if(kind==='trip'){const old=state.data.trips[id],newId=$('#eTrip').value.trim();if(!newId)return toast('Trip number required');if(newId!==id)delete state.data.trips[id];state.data.trips[newId]={...old,tripNo:newId,date:$('#eDate').value,cancelled:$('#eStatus').value==='cancelled',amount:$('#eStatus').value==='cancelled'?0:Number($('#eAmount').value)||0,updated:Date.now()}}else{const x=state.data.manual.find(m=>m.id===id);Object.assign(x,{date:$('#eDate').value,label:$('#eLabel').value.trim()||'Manual addition',amount:Number($('#eAmount').value)||0,updated:Date.now()})}persist();$('#editModal').classList.remove('show');render();toast('Entry updated')}
