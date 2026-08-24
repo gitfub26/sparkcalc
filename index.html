@@ -138,6 +138,8 @@ button,input,select{font:inherit;color:inherit}
 .btn.danger-ghost{background:transparent;border:1px solid var(--red-soft);color:var(--red)}
 .btn.full{width:100%}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
+.backup-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.backup-actions .btn{width:100%;min-width:0;padding:11px 5px;font-size:12px;display:flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap}
 
 /* import panel */
 .import-card{display:flex;flex-direction:column;gap:12px;transition:box-shadow .15s ease,border-color .15s ease}
@@ -264,7 +266,7 @@ button,input,select{font:inherit;color:inherit}
     <div class="section card">
       <h2 style="margin-top:0;font-size:14px;font-weight:800">Settings &amp; backup</h2>
       <div class="field"><label>GLOBAL DAILY GOAL</label><input id="goalInput" inputmode="decimal"></div>
-      <div class="actions">
+      <div class="actions backup-actions">
         <button id="saveGoal" class="btn primary">Save goal</button>
         <button id="exportBtn" class="btn ghost">Export backup</button>
         <label class="btn ghost" for="restoreInput">Restore backup</label>
