@@ -19,6 +19,8 @@
   --green-soft:#e6f6ec;
   --yellow:#f5b400;
   --yellow-soft:#fff4d6;
+  --info:#3b82f6;
+  --info-soft:#e8f2ff;
   --red:#dc2626;
   --red-soft:#fdeaea;
   --shadow:0 1px 2px rgba(20,26,33,.04),0 6px 20px rgba(20,26,33,.06);
@@ -39,6 +41,8 @@ html[data-theme="dark"]{
   --green-soft:#12271f;
   --yellow:#fbbf24;
   --yellow-soft:#2b230d;
+  --info:#7db7ff;
+  --info-soft:#17283d;
   --red:#f87171;
   --red-soft:#2a1616;
   --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 26px rgba(0,0,0,.4);
@@ -75,7 +79,7 @@ button,input,select{font:inherit;color:inherit}
 .earnings-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:800;color:var(--muted)}
 .earnings{font-size:34px;line-height:1.1;font-weight:800;letter-spacing:-.03em;margin-top:4px}
-.pill{padding:7px 11px;border-radius:99px;background:var(--yellow-soft);color:var(--yellow);font-weight:800;font-size:12.5px;white-space:nowrap;border:1px solid transparent}
+.pill{padding:7px 11px;border-radius:99px;background:var(--info-soft);color:var(--info);font-weight:800;font-size:12.5px;white-space:nowrap;border:1px solid transparent}
 .pill.over{background:var(--green-soft);color:var(--green)}
 .goal-line{margin-top:14px}
 .goalrow-top{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:6px}
@@ -105,7 +109,7 @@ button,input,select{font:inherit;color:inherit}
 .chart-day.today:not(.selected) .chart-bar{box-shadow:inset 0 0 0 2px var(--green)}
 .chart-day:active .chart-bar{transform:scaleX(.9)}
 .goal-marker{position:absolute;left:0;right:0;border-top:1px dashed var(--yellow);z-index:1;pointer-events:none}
-.goal-marker span{position:absolute;right:0;bottom:3px;padding-left:5px;background:var(--card);color:var(--yellow);font-size:9px;font-weight:800}
+.goal-marker span{display:none}
 .chart-labels{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;padding-top:6px}
 .chart-label{text-align:center;min-width:0;color:var(--muted);font-size:9.5px;font-weight:800;line-height:1.2}
 .chart-label small{display:block;font-size:8.5px;font-weight:700;margin-top:2px;color:var(--muted)}
@@ -207,7 +211,7 @@ button,input,select{font:inherit;color:inherit}
     <section class="card earnings-card">
       <div class="earnings-row">
         <div>
-          <div class="eyebrow">Today's earnings</div>
+          <div id="earningsLabel" class="eyebrow">Today's earnings</div>
           <div id="earnings" class="earnings">$0.00</div>
         </div>
         <div id="goalPill" class="pill">$100 left</div>
@@ -232,7 +236,7 @@ button,input,select{font:inherit;color:inherit}
       <div class="card chart-card">
         <div class="chart-meta"><span id="weekAverage">$0.00 daily average</span><span id="weekRange"></span></div>
         <div id="weeklyChart" class="chart-plot">
-          <div id="goalMarker" class="goal-marker"><span id="chartGoalLabel">$100 goal</span></div>
+          <div id="goalMarker" class="goal-marker"></div>
           <div id="weekBars" class="chart-bars"></div>
         </div>
         <div id="weekLabels" class="chart-labels"></div>
@@ -308,7 +312,7 @@ button,input,select{font:inherit;color:inherit}
 'use strict';
 const DBKEY='tripLedger.v1';
 const THEMEKEY='tripLedger.theme';
-const state={data:{goal:100,trips:{},manual:[],nextOrder:1},date:localISO(new Date()),review:null,editing:null,chartDate:null};
+const state={data:{goal:100,trips:{},manual:[],nextOrder:1},date:localISO(new Date()),weekEndDate:localISO(new Date()),review:null,editing:null,chartDate:null};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function localISO(d){const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)}
 function money(n){return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(n)||0)}
@@ -359,22 +363,23 @@ function stats(date){const {trips,manual}=entriesFor(date);const paid=trips.filt
 function lastSevenDays(endISO){const end=new Date(endISO+'T12:00:00');return Array.from({length:7},(_,i)=>{const d=new Date(end);d.setDate(end.getDate()-(6-i));const iso=localISO(d);return{iso,date:d,stats:stats(iso)}})}
 function shortMoney(n){const v=Number(n)||0;return v>=1000?'$'+(v/1000).toFixed(v>=10000?0:1)+'k':'$'+Math.round(v)}
 function renderWeekChart(){
-  const days=lastSevenDays(state.date),goal=Number(state.data.goal)||100,total=days.reduce((sum,d)=>sum+d.stats.earnings,0),today=localISO(new Date());
+  const days=lastSevenDays(state.weekEndDate||state.date),goal=Number(state.data.goal)||100,total=days.reduce((sum,d)=>sum+d.stats.earnings,0),today=localISO(new Date());
   if(!days.some(d=>d.iso===state.chartDate))state.chartDate=state.date;
   const scale=Math.max(goal,1,...days.map(d=>d.stats.earnings))*1.12;
   $('#weekTotal').textContent=money(total);
   $('#weekAverage').textContent=`${money(total/7)} daily average`;
   $('#weekRange').textContent=`${days[0].date.toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${days[6].date.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
-  $('#chartGoalLabel').textContent=`${shortMoney(goal)} goal`;
   $('#goalMarker').style.top=Math.max(4,Math.min(96,(1-goal/scale)*100))+'%';
   $('#weekBars').innerHTML=days.map(d=>{const pct=Math.max(2,d.stats.earnings/scale*100),classes=['chart-day'];if(d.iso===state.chartDate)classes.push('selected');if(d.iso===today)classes.push('today');return `<button type="button" class="${classes.join(' ')}" data-chart-date="${d.iso}" aria-label="${esc(fmtDateLabel(d.iso))}, ${esc(money(d.stats.earnings))}"><span class="chart-value">${shortMoney(d.stats.earnings)}</span><i class="chart-bar" style="height:${pct}%"></i></button>`}).join('');
   $('#weekLabels').innerHTML=days.map(d=>`<div class="chart-label ${d.iso===state.chartDate?'selected':''}">${d.date.toLocaleDateString('en-US',{weekday:'short'})}<small>${d.date.getDate()}</small></div>`).join('');
-  $$('[data-chart-date]').forEach(b=>b.onclick=()=>{state.chartDate=b.dataset.chartDate;renderWeekChart()});
+  $$('[data-chart-date]').forEach(b=>b.onclick=()=>{state.chartDate=b.dataset.chartDate;state.date=b.dataset.chartDate;$('#dayPicker').textContent=fmtDateLabel(state.date);$('#manualDate').value=state.date;render()});
   renderChartDetail();
 }
 function renderChartDetail(){const d=state.chartDate||state.date,s=stats(d);$('#chartDetail').innerHTML=`<strong>${esc(fmtDateLabel(d))}</strong><span>${money(s.earnings)} · ${s.totalTrips} ${s.totalTrips===1?'trip':'trips'} · ${money(s.avg)} avg</span>`}
 function render(){
   const s=stats(state.date),g=Number(state.data.goal)||100;
+  const today=localISO(new Date());
+  $('#earningsLabel').textContent=state.date===today?"Today's earnings":`${fmtDateLabel(state.date)} earnings`;
   $('#earnings').textContent=money(s.earnings);
   $('#avgStat').textContent=money(s.avg);
   $('#tripStat').textContent=s.totalTrips;
@@ -395,7 +400,7 @@ function rowHTML(x){
   return `<div class="row" data-entry="${esc(x.tripNo)}" data-kind="trip"><div class="meta"><div class="title">Trip #${esc(x.tripNo)}</div><div class="sub">${x.cancelled?'Cancelled':'Completed trip'}</div></div><div class="amount ${x.cancelled?'cancelled':''}">${x.cancelled?'Cancelled':money(x.amount)}</div></div>`;
 }
 function fmtDateLabel(iso){const d=new Date(iso+'T00:00:00');return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
-function setDate(d){state.date=d;$('#dayPicker').textContent=fmtDateLabel(d);$('#manualDate').value=d;render()}
+function setDate(d){state.date=d;state.weekEndDate=d;state.chartDate=d;$('#dayPicker').textContent=fmtDateLabel(d);$('#manualDate').value=d;render()}
 function datesWithData(){const s=new Set();Object.values(state.data.trips).forEach(t=>t.date&&s.add(t.date));state.data.manual.forEach(m=>m.date&&s.add(m.date));return s}
 let calView={y:0,m:0};
 function openCalendar(){const d=new Date(state.date+'T00:00:00');calView={y:d.getFullYear(),m:d.getMonth()};renderCalendar();$('#calendarModal').classList.add('show')}
