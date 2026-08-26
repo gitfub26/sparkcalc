@@ -19,8 +19,6 @@
   --green-soft:#e6f6ec;
   --yellow:#f5b400;
   --yellow-soft:#fff4d6;
-  --info:#3b82f6;
-  --info-soft:#e8f2ff;
   --red:#dc2626;
   --red-soft:#fdeaea;
   --shadow:0 1px 2px rgba(20,26,33,.04),0 6px 20px rgba(20,26,33,.06);
@@ -41,8 +39,6 @@ html[data-theme="dark"]{
   --green-soft:#12271f;
   --yellow:#fbbf24;
   --yellow-soft:#2b230d;
-  --info:#7db7ff;
-  --info-soft:#17283d;
   --red:#f87171;
   --red-soft:#2a1616;
   --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 26px rgba(0,0,0,.4);
@@ -79,7 +75,7 @@ button,input,select{font:inherit;color:inherit}
 .earnings-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:800;color:var(--muted)}
 .earnings{font-size:34px;line-height:1.1;font-weight:800;letter-spacing:-.03em;margin-top:4px}
-.pill{padding:7px 11px;border-radius:99px;background:var(--info-soft);color:var(--info);font-weight:800;font-size:12.5px;white-space:nowrap;border:1px solid transparent}
+.pill{padding:7px 11px;border-radius:99px;background:var(--red-soft);color:var(--red);font-weight:800;font-size:12.5px;white-space:nowrap;border:1px solid transparent}
 .pill.over{background:var(--green-soft);color:var(--green)}
 .goal-line{margin-top:14px}
 .goalrow-top{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:6px}
@@ -114,9 +110,6 @@ button,input,select{font:inherit;color:inherit}
 .chart-label{text-align:center;min-width:0;color:var(--muted);font-size:9.5px;font-weight:800;line-height:1.2}
 .chart-label small{display:block;font-size:8.5px;font-weight:700;margin-top:2px;color:var(--muted)}
 .chart-label.selected{color:var(--blue)}
-.chart-detail{margin-top:9px;padding:8px 10px;border-radius:10px;background:var(--card2);display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:42px}
-.chart-detail strong{font-size:11.5px;white-space:nowrap}
-.chart-detail span{font-size:10.5px;color:var(--muted);text-align:right;line-height:1.3}
 
 /* lists / rows */
 .list-card{padding:4px 10px}
@@ -240,7 +233,6 @@ button,input,select{font:inherit;color:inherit}
           <div id="weekBars" class="chart-bars"></div>
         </div>
         <div id="weekLabels" class="chart-labels"></div>
-        <div id="chartDetail" class="chart-detail"></div>
       </div>
     </section>
 
@@ -373,9 +365,7 @@ function renderWeekChart(){
   $('#weekBars').innerHTML=days.map(d=>{const pct=Math.max(2,d.stats.earnings/scale*100),classes=['chart-day'];if(d.iso===state.chartDate)classes.push('selected');if(d.iso===today)classes.push('today');return `<button type="button" class="${classes.join(' ')}" data-chart-date="${d.iso}" aria-label="${esc(fmtDateLabel(d.iso))}, ${esc(money(d.stats.earnings))}"><span class="chart-value">${shortMoney(d.stats.earnings)}</span><i class="chart-bar" style="height:${pct}%"></i></button>`}).join('');
   $('#weekLabels').innerHTML=days.map(d=>`<div class="chart-label ${d.iso===state.chartDate?'selected':''}">${d.date.toLocaleDateString('en-US',{weekday:'short'})}<small>${d.date.getDate()}</small></div>`).join('');
   $$('[data-chart-date]').forEach(b=>b.onclick=()=>{state.chartDate=b.dataset.chartDate;state.date=b.dataset.chartDate;$('#dayPicker').textContent=fmtDateLabel(state.date);$('#manualDate').value=state.date;render()});
-  renderChartDetail();
 }
-function renderChartDetail(){const d=state.chartDate||state.date,s=stats(d);$('#chartDetail').innerHTML=`<strong>${esc(fmtDateLabel(d))}</strong><span>${money(s.earnings)} · ${s.totalTrips} ${s.totalTrips===1?'trip':'trips'} · ${money(s.avg)} avg</span>`}
 function render(){
   const s=stats(state.date),g=Number(state.data.goal)||100;
   const today=localISO(new Date());
