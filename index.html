@@ -95,21 +95,21 @@ button,input,select{font:inherit;color:inherit}
 .chart-section{display:flex;flex:1;min-height:260px;flex-direction:column}
 .chart-head-total{display:flex;align-items:baseline;gap:4px;font-size:10.5px;color:var(--muted);font-weight:700}
 .chart-head-total b{font-size:14px;color:var(--ink)}
-.chart-card{display:flex;flex:1;min-height:230px;flex-direction:column;padding:12px 12px 11px;overflow:hidden}
+.chart-card{display:flex;flex:1;min-height:230px;max-height:260px;flex-direction:column;padding:12px 12px 11px;overflow:hidden}
 .chart-meta{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:10.5px;font-weight:700}
-.chart-scroll{position:relative;flex:1;min-height:175px;margin-top:9px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.chart-scroll{position:relative;flex:1;min-height:175px;max-height:190px;margin-top:9px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .chart-scroll::-webkit-scrollbar{display:none}
 .chart-track{position:relative;min-height:175px}
 .chart-plot{position:absolute;left:0;right:0;top:0;height:145px;border-bottom:1px solid var(--border)}
 .chart-bars{position:absolute;inset:0;display:grid;gap:6px;align-items:end;z-index:2}
-.chart-day{height:100%;min-width:0;padding:0 2px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:pointer;scroll-snap-align:start}
+.chart-day{height:100%;min-width:0;padding:0 2px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:pointer}
 .chart-value{height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;font-weight:800;color:var(--muted);white-space:nowrap;letter-spacing:-.02em}
 .chart-bar{display:block;width:min(30px,76%);min-height:4px;background:var(--border);border-radius:7px 7px 2px 2px;transition:height .3s ease,background .2s ease,transform .15s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
 .chart-day.selected .chart-bar{background:var(--blue)}
 .chart-day.selected .chart-value{color:var(--blue)}
 .chart-day.today:not(.selected) .chart-bar{box-shadow:inset 0 0 0 2px var(--green)}
 .chart-day:active .chart-bar{transform:scaleX(.9)}
-.goal-marker{position:absolute;left:0;right:0;border-top:1px dashed var(--goal-marker);z-index:1;pointer-events:none}
+.goal-marker{position:absolute;left:0;right:0;border-top:2px dashed var(--goal-marker);z-index:3;pointer-events:none;opacity:.95}
 .goal-marker span{display:none}
 .chart-labels{position:absolute;left:0;right:0;top:145px;display:grid;gap:6px;padding-top:6px}
 .chart-label{text-align:center;min-width:0;color:var(--muted);font-size:9.5px;font-weight:800;line-height:1.2}
@@ -365,12 +365,13 @@ function entriesFor(date){const trips=Object.values(state.data.trips).filter(x=>
 function stats(date){const {trips,manual}=entriesFor(date);const paid=trips.filter(t=>!t.cancelled);const tripTotal=paid.reduce((s,t)=>s+t.amount,0);const manualTotal=manual.reduce((s,m)=>s+m.amount,0);return{earnings:tripTotal+manualTotal,totalTrips:trips.length,avg:paid.length?tripTotal/paid.length:0,high:paid.length?Math.max(...paid.map(t=>t.amount)):0,trips,manual}}
 function timelineDays(endISO,count=90){const end=new Date(endISO+'T12:00:00');return Array.from({length:count},(_,i)=>{const d=new Date(end);d.setDate(end.getDate()-(count-1-i));const iso=localISO(d);return{iso,date:d,stats:stats(iso)}})}
 function shortMoney(n){const v=Number(n)||0;return v>=1000?'$'+(v/1000).toFixed(v>=10000?0:1)+'k':'$'+Math.round(v)}
-let chartScrollRAF=0,chartInitDone=false;
+let chartScrollRAF=0,chartSnapTimer=0,chartInitDone=false;
 function visibleWeekFromScroll(days){
   const scroller=$('#weekScroller');
-  const dayW=scroller.clientWidth/7;
-  const start=Math.max(0,Math.min(days.length-7,Math.round(scroller.scrollLeft/dayW)));
-  return days.slice(start,start+7);
+  const pageW=Math.max(1,scroller.clientWidth);
+  const weekIndex=Math.max(0,Math.min(Math.ceil(days.length/7)-1,Math.round(scroller.scrollLeft/pageW)));
+  const start=weekIndex*7;
+  return days.slice(start,Math.min(start+7,days.length));
 }
 function updateVisibleWeekSummary(days){
   const visible=visibleWeekFromScroll(days);
@@ -381,8 +382,16 @@ function updateVisibleWeekSummary(days){
   $('#weekRange').textContent=`${visible[0].date.toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${visible[visible.length-1].date.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
   state.weekEndDate=visible[visible.length-1].iso;
 }
+function snapChartToFullWeek(days,behavior='smooth'){
+  const scroller=$('#weekScroller');
+  const pageW=Math.max(1,scroller.clientWidth);
+  const maxWeek=Math.max(0,Math.ceil(days.length/7)-1);
+  const weekIndex=Math.max(0,Math.min(maxWeek,Math.round(scroller.scrollLeft/pageW)));
+  scroller.scrollTo({left:weekIndex*pageW,behavior});
+  updateVisibleWeekSummary(days);
+}
 function renderWeekChart(){
-  const today=localISO(new Date()),days=timelineDays(today,90),goal=Number(state.data.goal)||100;
+  const today=localISO(new Date()),days=timelineDays(today,91),goal=Number(state.data.goal)||100;
   if(!days.some(d=>d.iso===state.chartDate))state.chartDate=state.date;
   const scale=Math.max(goal,1,...days.map(d=>d.stats.earnings))*1.12;
   const scroller=$('#weekScroller'),track=$('#weekTrack');
@@ -396,7 +405,7 @@ function renderWeekChart(){
   $('#weekLabels').innerHTML=days.map(d=>`<div class="chart-label ${d.iso===state.chartDate?'selected':''}">${d.date.toLocaleDateString('en-US',{weekday:'short'})}<small>${d.date.getDate()}</small></div>`).join('');
   $$('[data-chart-date]').forEach(b=>b.onclick=()=>{state.chartDate=b.dataset.chartDate;state.date=b.dataset.chartDate;$('#dayPicker').textContent=fmtDateLabel(state.date);$('#manualDate').value=state.date;render()});
   if(!chartInitDone){
-    scroller.scrollLeft=Math.max(0,(days.length-7)*dayW);
+    scroller.scrollLeft=Math.max(0,track.scrollWidth-viewport);
     chartInitDone=true;
   }
   updateVisibleWeekSummary(days);
@@ -405,7 +414,12 @@ function renderWeekChart(){
     scroller.addEventListener('scroll',()=>{
       cancelAnimationFrame(chartScrollRAF);
       chartScrollRAF=requestAnimationFrame(()=>updateVisibleWeekSummary(days));
+      clearTimeout(chartSnapTimer);
+      chartSnapTimer=setTimeout(()=>snapChartToFullWeek(days),120);
     },{passive:true});
+    if('onscrollend' in scroller){
+      scroller.addEventListener('scrollend',()=>snapChartToFullWeek(days),{passive:true});
+    }
   }
 }
 function render(){
@@ -520,3 +534,5 @@ initTheme();load();setDate(state.date);
 </script>
 </body>
 </html>
+
+<!-- v3: V1-proportioned chart with full-week horizontal snapping -->
